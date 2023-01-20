@@ -3,3 +3,5 @@ GitPython
 requests
 pydriller
 termcolor
+nltk
+openai
