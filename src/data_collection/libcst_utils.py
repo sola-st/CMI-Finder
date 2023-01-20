@@ -280,6 +280,83 @@ def remove_else(if_stmt):
         if i < p_i:
             return '\n'.join(if_only)
         else:
-            #if l!= '\n':
             if_only.append(l)
             p_i = i
+
+class FindFunctionDef(cst.CSTVisitor):
+    """
+    A class that inherits from the cst.CSTVisitor class and is used to find and store 
+    function definitions within a given codebase.
+
+    Attributes:
+    functions (list): A list of tuples containing the name and code of the functions found
+    """
+    def __init__(self):
+        self.functions = []
+        
+    def visit_FunctionDef(self, node):
+        """
+        Visit a function definition node in the CST and store its name and the code for the function.
+
+        Parameters:
+            node (cst.FunctionDef): The function definition node to visit.
+
+        Returns:
+            None
+        """
+        self.functions.append((node.name.value, cst.Module([node]).code))
+
+
+def extract_batch_functions(paths):
+    """
+    Extracts all functions from a list of file paths and returns a list of tuples
+    containing the file path and the functions found in each file.
+
+    Parameters:
+        paths (List[str]): A list of file paths to extract functions from.
+
+    Returns:
+        List[Tuple[str, List[Tuple[str, str]]]]: A list of tuples containing the file path and a list of tuples
+        containing the name and code of the functions found in the file.
+    """
+    functions_list = []
+    for f_path in paths:
+        try:
+            with open(f_path) as fp:
+                code = fp.read()
+        except Exception as e:
+            print(e)
+            continue
+        try:
+            function_finder = FindFunctionDef()
+            tree = cst.parse_module(code)
+            _ = tree.visit(function_finder)
+
+            functions_list.append((f_path, function_finder.functions))
+
+        except Exception as e:
+            pass
+        
+    return functions_list
+
+def extract_ifs(code):
+    """
+    Extracts simple if statements from a given code.
+
+    Parameters:
+        code (str): The code to extract if statements from.
+
+    Returns:
+        List[str]: A list of simple if statements in the given code.
+    """
+    finder = FindIf()
+    code = code.split('\n')
+    
+    try:
+
+        tree = cst.parse_module('\n'.join(code))
+        _ = tree.visit(finder)
+        ifs = get_simple_ifs(finder)
+    except Exception as e:
+        ifs = []
+    return ifs

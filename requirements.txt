@@ -1,3 +1,5 @@
 libcst
 GitPython
 requests
+pydriller
+termcolor
