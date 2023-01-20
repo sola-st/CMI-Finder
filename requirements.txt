@@ -5,3 +5,9 @@ pydriller
 termcolor
 nltk
 openai
+torch
+transformers
+datasets
+tensorflow
+keras
+matplotlib
