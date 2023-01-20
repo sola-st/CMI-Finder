@@ -52,6 +52,8 @@ rename_globals = {
         'at most': '<='
     }
 
+
+special_embedding = {}
     
 def tokenize_if_block(code):
     try:
@@ -63,15 +65,16 @@ def tokenize_if_block(code):
 def vectorize_if_block(tokens, model):
     vector = []
     for t in tokens:
-        if t in special_embeding:
-            vector.append(model.wv[special_embeding[t]])
+        if t in special_embedding:
+            vector.append(model.wv[special_embedding[t]])
         else:
             vector.append(model.wv[t])
     return vector
 
+
+from tokenize import tokenize
+from io import BytesIO
 def tokenize_python(code):
-    from tokenize import tokenize
-    from io import BytesIO
     
     g = tokenize(BytesIO(code.encode('utf-8')).readline)
     try:
