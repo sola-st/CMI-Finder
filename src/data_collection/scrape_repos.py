@@ -5,7 +5,7 @@ import os
 
 
 
-def download_projects(response, base_dir='./selected_projects/'):
+def download_projects(response, to_download, base_dir='./cloned_repos/'):
     """
     download_projects(response: requests.Response, base_dir: str = './selected_projects/') -> List[int]
 
@@ -20,14 +20,27 @@ def download_projects(response, base_dir='./selected_projects/'):
 
     """
     concerned = []
+    i = 0
     for repo in response.json()['items']:
+        if i == to_download:
+            break
+        i += 1
         if not os.path.isdir(base_dir+str(repo['id'])):
             Repo.clone_from(repo['clone_url'], base_dir + str(repo['id']))
             concerned.append(repo['id'])
     return concerned
 
+def clone_projects(projects_list, to_download, base_dir='./cloned_repos/'):
+    i = 0
+    for repo in projects_list:
+        if i == to_download:
+            break
+        i += 1
+        if not os.path.isdir(base_dir+str(repo['id'])):
+            Repo.clone_from(repo, base_dir + str(repo.replace("/", "#####")))
 
-def search_and_clone(goal=4000, auth=("github user name", "github token"), start_ts = 1461320462):
+
+def search_and_clone(goal=4000, auth=("github user name", "github token"), start_ts = 1461320462, base_dir = "./selected_projects/"):
 
     """
     search_and_clone(goal: int = 4000, auth: Tuple[str,str] = ("github user name", "github token"), start_ts: int = 1461320462) -> List[int]
@@ -49,10 +62,12 @@ def search_and_clone(goal=4000, auth=("github user name", "github token"), start
     headers = {
         'Accept': 'application/vnd.github.v3+json',
     }
+    
     day_unit = 86400
     week_unit = day_unit * 7
     month_unit = week_unit * 4
-    working_unit = week_unit
+    working_unit = day_unit
+    concerned_projects = []
 
     c_date = str(datetime.utcfromtimestamp(start_ts).strftime('%Y-%m-%d'))+'..'+\
              str(datetime.utcfromtimestamp(start_ts+working_unit).strftime('%Y-%m-%d'))
@@ -73,7 +88,11 @@ def search_and_clone(goal=4000, auth=("github user name", "github token"), start
             for page in range(n_pages):
                 request = 'https://api.github.com/search/repositories?q=created:"%s"language:python&sort=stars&order=desc&per_page=100&page=%d' % (c_date, page)
                 response =requests.get(request, headers=headers, auth=auth)
-                concerned_projects += download_projects(response)
+                if len(concerned_projects)+total_count > goal:
+                    to_download = goal - len(concerned_projects)
+                else:
+                    to_download = 100
+                concerned_projects += download_projects(response, to_download)
             
             
             working_unit = week_unit
@@ -91,7 +110,11 @@ def search_and_clone(goal=4000, auth=("github user name", "github token"), start
             for page in range(n_pages):
                 request = 'https://api.github.com/search/repositories?q=created:"%s"language:python&sort=stars&order=desc&per_page=100&page=%d' % (c_date, page)
                 response =requests.get(request, headers=headers, auth=auth)
-                concerned_projects += download_projects(response)
+                if len(concerned_projects)+total_count > goal:
+                    to_download = goal - len(concerned_projects)
+                else:
+                    to_download = 100
+                concerned_projects += download_projects(response, to_download)
             
             working_unit = week_unit
             start_ts = start_ts + month_unit
@@ -107,7 +130,11 @@ def search_and_clone(goal=4000, auth=("github user name", "github token"), start
             for page in range(n_pages):
                 request = 'https://api.github.com/search/repositories?q=created:"%s"language:python&sort=stars&order=desc&per_page=100&page=%d' % (c_date, page)
                 response =requests.get(request, headers=headers, auth=auth)
-                concerned_projects += download_projects(response)
+                if len(concerned_projects)+total_count > goal:
+                    to_download = goal - len(concerned_projects)
+                else:
+                    to_download = 100
+                concerned_projects += download_projects(response, to_download)
             
             working_unit = week_unit
             start_ts = start_ts + week_unit

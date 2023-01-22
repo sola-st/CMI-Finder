@@ -2,6 +2,7 @@ import libcst as cst
 from data_collection.libcst_utils import FindIf, get_simple_ifs, remove_else
 from multiprocessing import Pool
 import json
+import os
 
 def get_if_stmts_tups(concerned_projects, start, end, base_dir='./selected_projects/'):
     """
@@ -62,8 +63,8 @@ def paralel_extractor(concerned_projects, n_cpus=40):
     results_cpu = [] 
     answers_cpu = []
 
-    for i in range(n_cpus-1):
-        result_i = pool.apply_async(get_if_stmts_tups, [int((i)*len(concerned_projects)/n_cpus),int((i+1)*len(concerned_projects)/n_cpus), ifstmt_by_repo])
+    for i in range(n_cpus):
+        result_i = pool.apply_async(get_if_stmts_tups, [concerned_projects ,int((i)*len(concerned_projects)/n_cpus),int((i+1)*len(concerned_projects)/n_cpus)])
         results_cpu.append(result_i)
         
     for result_i in results_cpu:
