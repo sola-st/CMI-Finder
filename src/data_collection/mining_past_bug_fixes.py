@@ -2,7 +2,7 @@ import re
 from pydriller import Repository
 from pathlib import Path
 from data_collection.utils import run_merge_responses
-from data_collection.libcst_utils import FindRaise, FindPrint, FindString, remove_else
+from data_collection.libcst_utils import FindRaise, FindPrint, FindString, remove_else, extract_ifs
 import libcst as cst
 from termcolor import colored
 
@@ -38,29 +38,25 @@ def create_diff_files(diff):
     return '\n'.join(old_code), '\n'.join(new_code)
 
 
-def construct_pairs(start, end, response):
+def construct_pairs(repo_url):
     """
     Constructs a list of tuple containing information about commits that fix bugs in python files from a given range of repositories.
 
     Parameters:
-        start (int): The start index of the repository range.
-        end (int): The end index of the repository range.
-        response (requests.Response): The response from the API containing information about the repositories.
+        repo_url (str): 
 
     Returns:
         List[Tuple[str, str, str, str]]: A list of tuples containing the repository url, filename, old code and new code for commits that fix bugs in python files.
     """
     if_files_list = []
-    for repo in response.json()['items'][start:end]:
-        print(repo['full_name'])
-        for commit in Repository(repo['html_url']).traverse_commits():
-            if 'fix' in commit.msg.lower() or 'bug' in commit.msg.lower():
-                for m in commit.modified_files:
-                    if m.filename.endswith('.py'):
-                        old = m.source_code_before
-                        new = m.source_code
-                        if old is not None and new is not None:
-                            if_files_list.append((repo['html_url']+'/commit/'+commit.hash, m.filename, old, new))
+    for commit in Repository(repo_url).traverse_commits():
+        if 'fix' in commit.msg.lower() or 'bug' in commit.msg.lower():
+            for m in commit.modified_files:
+                if m.filename.endswith('.py'):
+                    old = m.source_code_before
+                    new = m.source_code
+                    if old is not None and new is not None:
+                        if_files_list.append((repo_url+'/commit/'+commit.hash, m.filename, old, new))
     return if_files_list
 
 
@@ -77,7 +73,6 @@ def extractor(ifs_list_sub):
     """
     commit_old_new = {}
     for if_s in ifs_list_sub:
-
         #print(count)
         commit_old_new[if_s[0]] = {
             if_s[1] : {
@@ -89,7 +84,7 @@ def extractor(ifs_list_sub):
     return commit_old_new
 
 
-def simplify_statements_collection(commit_old_new):
+def simplify_collected_statements(commit_old_new):
     """
     Simplifies the if statements collection by extracting raise and print statements.
 
@@ -114,21 +109,9 @@ def simplify_statements_collection(commit_old_new):
 
                     if_tup[1][2] = raise_finder.raises + print_finder.prints
                     if_tup[0][2] = ' '.join([cst.Module([x]).code for x in raise_finder.raises+print_finder.prints])
-                    if len(raise_finder.raises) > 0 and len(print_finder.prints) > 0:
-                        yes_raise_yes_print += 1
-                    elif len(raise_finder.raises) > 0 and len(print_finder.prints) == 0:
-                        yes_raise_no_print += 1
-                    elif len(print_finder.prints) > 0:
-                        no_raise += 1
-                        yes_print += 1
-                    if len(print_finder.prints) == 0 and len(raise_finder.raises) == 0:
-                        no_raise += 1
-
                     if len(string_finder.strings) > 0 and len(print_finder.prints) == 0 and len(raise_finder.raises) == 0:
                         if_tup[0][2] = 'show code'
                         if_tup[1][2] = string_finder.strings
-                        possible_log += 1
-
     return commit_old_new
 
 def construct_text_data(if_stmts):
@@ -165,7 +148,7 @@ def postprocess_old_new_commits(commit_old_new):
                 'new_if_raise': construct_text_data(raise_tups_new)
             }
 
-    return raise_tups_old, raise_tups_old
+    return commit_old_new
 
 
 def postprocess_old_new_commits_(commit_old_new):
