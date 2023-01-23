@@ -379,4 +379,11 @@ def extract_ifs(code):
         ifs = get_simple_ifs(finder)
     except Exception as e:
         ifs = []
-    return ifs
+    return ifs  
+
+class FunctionExtractor(cst.CSTVisitor):
+    def __init__(self):
+        self.functions = []
+    
+    def visit_FunctionDef(self, node: cst.FunctionDef):
+        self.functions.append(cst.Module([node]).code)

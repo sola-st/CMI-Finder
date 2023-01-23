@@ -18,7 +18,7 @@ parser.add_argument(
 )
 
 parser.add_argument(
-    "output_dir",
+    "--output",
     help = "directory where to save the extracted data file",
     required=True
 )
@@ -35,6 +35,7 @@ def extract_condition_message_pairs(source, output_dir, cat="file", n=1):
                 functions.extend(json.load(ffd))
         
     pairs = run_merge_responses(functions, extract_batch_,n_cpus_a=n)
+    
     pairs_inline = []
     for p in pairs:
         stmts = p[0]
@@ -66,16 +67,17 @@ def extract_condition_message_pairs(source, output_dir, cat="file", n=1):
             if 'print' in m[: m.find('(')] or 'log' in m[: m.find('(')] or 'raise' in m[: m.find('(')]:
                 print_raise_pairs.append((c, m))
     not_empty_strings = exclude_empty_strings(print_raise_pairs)
-    with open(os.path.join(output_dir, "extracted_data.json"), 'w') as edj:
+    with open(os.path.join(output_dir, "extracted_condition_message_pairs.json"), 'w') as edj:
         json.dump(not_empty_strings, edj)
 
-if __name__ == "main":
+if __name__ == "__main__":
     args = parser.parse_args()
     source = args.source
-
+    output = args.output
+    n = int(args.n)
     if os.path.isfile(source):
-        print("file")
+        extract_condition_message_pairs(source, output, cat="file", n=n)
     elif os.path.isfolder(source):
-        print("folder")
+        extract_condition_message_pairs(source, output, cat="dir", n=n)
     else:
         raise FileNotFoundError("Could not find the specified path")
