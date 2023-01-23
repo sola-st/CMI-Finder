@@ -1,8 +1,8 @@
 import re
 from pydriller import Repository
 from pathlib import Path
-from data_collection.utils import run_merge_responses
-from data_collection.libcst_utils import FindRaise, FindPrint, FindString, remove_else, extract_ifs
+from .utils import run_merge_responses
+from .libcst_utils import FindRaise, FindPrint, FindString, remove_else, extract_ifs
 import libcst as cst
 from termcolor import colored
 

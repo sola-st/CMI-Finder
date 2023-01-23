@@ -1,13 +1,11 @@
 import libcst as cst
-from data_collection.libcst_utils import FindIf, get_simple_ifs, remove_else
+from .libcst_utils import FindIf, get_simple_ifs, remove_else
 from multiprocessing import Pool
 import json
 import os
 
-def get_if_stmts_tups(concerned_projects, start, end, base_dir='./selected_projects/'):
+def get_if_stmts_tups(concerned_projects, start, end, base_dir):
     """
-    get_if_stmts_tups(concerned_projects: List[int], start: int, end: int, base_dir: str = './selected_projects/') -> Dict[int, List[Tuple[List[str], List[str]]]]
-
     This function takes a list of repository ids, a start index and an end index, and a directory path where the repositories are saved.
     It parses the python files of the repositories in the specified range and returns a dictionary with keys as repository ids and values as a list of tuples representing if statements.
     Each tuple contains 4 elements : the if statement with its condition, the if statement in CST format, the else statement in CST format and the else if statement in CST format.
@@ -16,7 +14,7 @@ def get_if_stmts_tups(concerned_projects, start, end, base_dir='./selected_proje
         concerned_projects (List[int]): The list of repository ids that should be processed.
         start (int): The start index of the repositories to be processed in the concerned_projects list.
         end (int): The end index of the repositories to be processed in the concerned_projects list.
-        base_dir (str, optional): The directory where the repositories are saved. Default is './selected_projects/'
+        base_dir (str): The directory where the repositories are saved. Default is './selected_projects/'
 
     Returns:
         Dict[int, List[Tuple[List[str], List[str]]]]: A dictionary with keys as repository ids and values as a list of tuples representing if statements.
@@ -43,7 +41,7 @@ def get_if_stmts_tups(concerned_projects, start, end, base_dir='./selected_proje
     return ifstmt_by_repo
 
 
-def paralel_extractor(concerned_projects, n_cpus=40):
+def paralel_extractor(concerned_projects, base_dir, n_cpus=40):
     """
     paralel_extractor(concerned_projects: List[int], n_cpus: int = 40) -> Dict[int, List[Tuple[List[str], List[str]]]]
 
@@ -64,7 +62,7 @@ def paralel_extractor(concerned_projects, n_cpus=40):
     answers_cpu = []
 
     for i in range(n_cpus):
-        result_i = pool.apply_async(get_if_stmts_tups, [concerned_projects ,int((i)*len(concerned_projects)/n_cpus),int((i+1)*len(concerned_projects)/n_cpus)])
+        result_i = pool.apply_async(get_if_stmts_tups, [concerned_projects ,int((i)*len(concerned_projects)/n_cpus),int((i+1)*len(concerned_projects)/n_cpus), base_dir])
         results_cpu.append(result_i)
         
     for result_i in results_cpu:
@@ -147,5 +145,3 @@ def construct_text_data(if_stmts):
                 text_data.append(stmt.replace('\n\n', '\n'))
                 
     return text_data
-
-

@@ -26,7 +26,7 @@ def download_projects(response, to_download, base_dir='./cloned_repos/'):
             break
         i += 1
         if not os.path.isdir(base_dir+str(repo['id'])):
-            Repo.clone_from(repo['clone_url'], base_dir + str(repo['id']))
+            Repo.clone_from(repo['clone_url'], os.path.join(base_dir, str(repo['id'])))
             concerned.append(repo['id'])
     return concerned
 
@@ -36,8 +36,8 @@ def clone_projects(projects_list, to_download, base_dir='./cloned_repos/'):
         if i == to_download:
             break
         i += 1
-        if not os.path.isdir(base_dir+str(repo['id'])):
-            Repo.clone_from(repo, base_dir + str(repo.replace("/", "#####")))
+        if not os.path.isdir(base_dir+str(repo)):
+            Repo.clone_from(repo, os.path.join(base_dir, str(repo.replace("/", "#####"))))
 
 
 def search_and_clone(goal=4000, auth=("github user name", "github token"), start_ts = 1461320462, base_dir = "./selected_projects/"):
@@ -92,7 +92,7 @@ def search_and_clone(goal=4000, auth=("github user name", "github token"), start
                     to_download = goal - len(concerned_projects)
                 else:
                     to_download = 100
-                concerned_projects += download_projects(response, to_download)
+                concerned_projects += download_projects(response, to_download, base_dir=base_dir)
             
             
             working_unit = week_unit
@@ -114,7 +114,7 @@ def search_and_clone(goal=4000, auth=("github user name", "github token"), start
                     to_download = goal - len(concerned_projects)
                 else:
                     to_download = 100
-                concerned_projects += download_projects(response, to_download)
+                concerned_projects += download_projects(response, to_download, base_dir=base_dir)
             
             working_unit = week_unit
             start_ts = start_ts + month_unit
@@ -134,9 +134,12 @@ def search_and_clone(goal=4000, auth=("github user name", "github token"), start
                     to_download = goal - len(concerned_projects)
                 else:
                     to_download = 100
-                concerned_projects += download_projects(response, to_download)
+                concerned_projects += download_projects(response, to_download, base_dir=base_dir)
             
             working_unit = week_unit
             start_ts = start_ts + week_unit
             c_date = str(datetime.utcfromtimestamp(start_ts).strftime('%Y-%m-%d'))+'..'+str(datetime.utcfromtimestamp(start_ts+working_unit).strftime('%Y-%m-%d'))
     return concerned_projects
+
+if __name__ == '__main__':
+    print("Inside main of scrape_repos")
