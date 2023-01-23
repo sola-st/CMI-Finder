@@ -1,5 +1,5 @@
 import libcst as cst
-from .libcst_utils import FindIf, get_simple_ifs, remove_else
+from .libcst_utils import FindIf, get_simple_ifs, remove_else, FindCall, FindRaise, FindString
 from multiprocessing import Pool
 import json
 import os
@@ -145,3 +145,269 @@ def construct_text_data(if_stmts):
                 text_data.append(stmt.replace('\n\n', '\n'))
                 
     return text_data
+
+# extract condition message statements using LIBCST
+def extract_ifs_tree(func_def):
+
+    if_stmts_tree = {}
+    try:
+        func_tree = cst.parse_module(func_def).body[0]
+    except:
+        return if_stmts_tree 
+    statements = func_tree.body.body
+    
+    count = 1
+    level = 1
+    
+    for stmt in statements:
+        if type(stmt) == cst._nodes.statement.If:
+            if_stmts_tree[str(level)+'.'+str(count)+'.0.0'] = stmt
+            count += 1
+            ostmt = stmt.orelse
+            while ostmt is not None:
+                if_stmts_tree[str(level)+'.'+str(count)+'.0.0'] = ostmt
+                count += 1
+                if hasattr(ostmt, 'orelse'):
+                    ostmt = ostmt.orelse
+                else:
+                    ostmt = None
+    
+    #print(if_stmts_tree.keys())
+    current_level = 1 
+    next_level = 2
+    count = 1
+    stop = False
+    
+    while not stop:
+        stop = True
+        count = 1
+        for level in [l for l in if_stmts_tree.keys() if l.startswith(str(current_level))]:  
+            #print(level)
+            stmt = if_stmts_tree[level]
+            if type(stmt) == cst._nodes.statement.If:
+                for sub_stmt in stmt.body.body:
+                    if type(sub_stmt) == cst._nodes.statement.If:
+                        if_stmts_tree[str(next_level)+'.'+str(count)+'.'+level.split('.')[0]+'.'+level.split('.')[1]] = sub_stmt
+                        count += 1
+                        osub_stmt = sub_stmt
+                        if hasattr(osub_stmt, 'orelse'):
+                            osub_stmt = osub_stmt.orelse
+                        else:
+                            osub_stmt = None
+                        while osub_stmt is not None:
+                            if_stmts_tree[str(next_level)+'.'+str(count)+'.'+level.split('.')[0]+'.'+level.split('.')[1]] = osub_stmt
+                            count += 1
+                            if hasattr(osub_stmt, 'orelse'):
+                                osub_stmt = osub_stmt.orelse
+                            else:
+                                osub_stmt = None
+                    else:
+                        if type(sub_stmt) == cst._nodes.statement.SimpleStatementLine:
+                            call_finder = FindCall()
+                            _ = sub_stmt.body[0].visit(call_finder)
+
+                            if (type(sub_stmt.body[0]) == cst._nodes.statement.Raise or len(call_finder.prints) != 0):
+                                if_stmts_tree[str(next_level)+'.'+str(count)+'.'+level.split('.')[0]+'.'+level.split('.')[1]] = sub_stmt
+                                count += 1
+            if type(stmt) == cst._nodes.statement.Else:
+                for sub_stmt in stmt.body.body:
+                    if type(sub_stmt) == cst._nodes.statement.If:
+                        if_stmts_tree[str(next_level)+'.'+str(count)+'.'+level.split('.')[0]+'.'+level.split('.')[1]] = sub_stmt
+                        count += 1
+                        osub_stmt = sub_stmt.orelse
+                        while osub_stmt is not None:
+                            if_stmts_tree[str(next_level)+'.'+str(count)+'.'+level.split('.')[0]+'.'+level.split('.')[1]] = osub_stmt
+                            count += 1
+                            if hasattr(osub_stmt, 'orelse'):
+                                osub_stmt = osub_stmt.orelse
+                            else:
+                                osub_stmt = None
+                    else:
+                        if type(sub_stmt) == cst._nodes.statement.SimpleStatementLine:
+                            call_finder = FindCall()
+                            _ = sub_stmt.body[0].visit(call_finder)
+                            if (type(sub_stmt.body[0]) == cst._nodes.statement.Raise or len(call_finder.prints) != 0):
+                                if_stmts_tree[str(next_level)+'.'+str(count)+'.'+level.split('.')[0]+'.'+level.split('.')[1]] = sub_stmt
+                                count += 1
+            stop = False
+        current_level += 1
+        next_level += 1
+    return if_stmts_tree, func_def
+
+def get_nested_ifs(ifs_trees, func_def):
+    max_level = max([int(l.split('.')[0]) for l in ifs_trees])
+    pairs = []
+    while max_level > 1:
+        for k in ifs_trees:
+            if k.startswith(str(max_level)):
+                if type(ifs_trees[k]) not in (cst._nodes.statement.If, cst._nodes.statement.Else):
+                    stmt = ifs_trees[k].body[0]
+                    stop = False
+                    condition = []
+                    parent = k
+                    while not stop:
+                        parent = parent.split('.')[2]+'.'+parent.split('.')[3]+'.'
+                        for p in ifs_trees.keys():
+                            #print('got it once')
+                            if p.startswith(parent):
+                                if type(ifs_trees[p]) not in (cst._nodes.statement.If, cst._nodes.statement.Else):
+                                    raise TypeError('This should be an if')
+                                elif type(ifs_trees[p]) == cst._nodes.statement.If:
+                                    condition.append(cst.Module([ifs_trees[p].test]).code)
+                                elif type(ifs_trees[p]) == cst._nodes.statement.Else:
+                                    rank = int(p.split('.')[1]) - 1
+                                    while rank > 0:
+                                        neighbor = p.split('.')[0] + '.' + str(rank) + '.' + p.split('.')[2] + '.' + p.split('.')[3]
+                                        if hasattr(ifs_trees[neighbor], 'orelse') and ifs_trees[neighbor].orelse is not None:
+                                            condition.append(('not', cst.Module([ifs_trees[neighbor].test]).code))
+                                        rank -= 1
+
+                                parent = p       
+                                break
+                        #print('end for')
+                        if parent.startswith("1."):
+                            stop = True
+                    pairs.append((condition, stmt))
+        max_level -= 1
+    return [(c, cst.Module([m]).code) for c, m in pairs], func_def
+
+def extract_batch_(raise_functions):
+    pairs = []
+    for rf in raise_functions:
+        tree, func_def = extract_ifs_tree(rf)
+        if len(tree)!=0:
+            try:
+                stmts_pairs, func_def = get_nested_ifs(tree, func_def)
+                if len(stmts_pairs)!=0:
+                    pairs.append((stmts_pairs, func_def))
+            except Exception as e:
+                print(e)
+    return pairs
+
+
+def filter_batch(functions):
+    local_raise = []
+    for rf in functions:
+        tree = cst.parse_module(rf)
+        finder = FindRaise()
+        _ = tree.visit(finder)
+        if finder.raises:
+            local_raise.append(tree)
+    return local_raise
+
+def simplify_comparison(c):
+    if c.startswith('not '):
+        if 'any(' in c:
+            c =  c.replace('any(', 'all(')
+        elif 'all(' in c:
+            c = c.replace('all(', 'any(')
+        if '==' in c:
+            return c.replace('==', '!=')[4:]
+        elif '!=' in c:
+            return c.replace('!=', '==')[4:]
+        elif '<=' in c:
+            return c.replace('<=', '>')[4:]
+        elif '>=' in c:
+            return c.replace('>=', '<')[4:]
+        elif '<' in c:
+            return c.replace('<', '>=')[4:]
+        elif '>' in c:
+            return c.replace('>', '<=')[4:]
+        elif ' is not ' in c:
+            return c.replace(' is not ', ' is ')[4:]
+        elif ' not in ' in c:
+            return c.replace(' not in ', ' in ')[4:]
+        elif ' in ' in c:
+            return c.replace(' in ', ' not in ')[4:]
+        elif ' is ' in c:
+            return c.replace(' is ', ' is not ')[4:]
+        else:
+            return c
+    else:
+        return c
+
+
+def simplify_condition(c):
+    # not == ==> !=
+    # not != ==> ==
+    # not < ==> >=
+    # not > ==> <=
+    if c.count(' and ') + c.count(' or ') + c.count('and(') + c.count(')and')+c.count('or)')+c.count('(or') == 0:
+        return simplify_comparison(c)
+    
+    elif c.count(' and ') + c.count(' or ') == 1:
+        
+        if c.count(' and ') == 1:
+            split_c = c.split(' and ')
+            if split_c[0].count('(') - split_c[0].count(')')!=0:
+                if split_c[0].startswith('not ('):
+                    split_c[0] = 'not ' + split_c[0][5:]
+                    split_c[1] = 'not ' + split_c[1][:-1]
+                    return simplify_comparison(split_c[0]) + ' or ' + simplify_comparison(split_c[1])
+                elif split_c[0][0]==('('):
+                    split_c[0] = split_c[0][1:]
+                    split_c[1] = split_c[1][:-1]
+                    return simplify_comparison(split_c[0]) + ' and ' + simplify_comparison(split_c[1])
+                else:
+                    return c
+            else:
+                return simplify_comparison(split_c[0]) + ' and ' + simplify_comparison(split_c[1])
+                
+                
+        if c.count(' or ') == 1:
+            split_c = c.split(' or ')
+            if split_c[0].count('(') - split_c[0].count(')')!=0:
+                if split_c[0].startswith('not ('):
+                    split_c[0] = 'not ' + split_c[0][5:]
+                    split_c[1] = 'not ' + split_c[1][:-1]
+                    return simplify_comparison(split_c[0]) + ' and ' + simplify_comparison(split_c[1])
+                elif split_c[0][0]==('('):
+                    split_c[0] = split_c[0][1:]
+                    split_c[1] = split_c[1][:-1]
+                    return simplify_comparison(split_c[0]) + ' or ' + simplify_comparison(split_c[1])
+                else:
+                    return c
+            else:
+                return simplify_comparison(split_c[0]) + ' or ' + simplify_comparison(split_c[1])
+    else:
+        return c
+
+def remove_extra_para(condition):
+    d = condition
+    if d.count(' and ') + d.count(' or ') ==0:
+        if d.startswith('(') and d.endswith(')'):
+            return d[1:-1]
+        elif d.startswith('not (') and d.endswith(')'):
+            return 'not ' + d[5:-1]
+        else:
+            return d
+    else:
+        return d
+
+def remove_extra_space(condition):
+    start = 0
+    end = 0
+    for i in range(len(condition)):
+        if condition[i] != ' ':
+            start = i
+            break
+    for i in range(len(condition)-1, 0, -1):
+        if condition[i] != ' ':
+            end = i
+            break
+    
+    return condition[start:end+1]
+
+
+def exclude_empty_strings(data):
+    not_empty = []
+    empty = 0
+    for d in data:
+        finder_s = FindString()
+        tree = cst.parse_module(d[1])
+        _ = tree.visit(finder_s)
+        if len(finder_s.strings) != 0:
+            not_empty.append(d)
+        else:
+            empty += 1
+    return not_empty

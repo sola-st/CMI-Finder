@@ -1,6 +1,26 @@
 import libcst as cst
 
-
+# Find print and log statements
+class FindCall(cst.CSTVisitor):
+    
+    prints = []
+    raises = []
+    other_calls = []
+    
+    def __init__(self):
+        self.prints = []
+        self.other_calls = []
+        self.raises = []
+        
+    def visit_Call(self, node: cst.Call):
+        try:
+            if node.func.value == 'print' or 'log' in str(node.func.value):
+                self.prints.append(node)
+            else:
+                self.other_calls.append(node)
+        except Exception as e:
+            pass
+            #print("CALL DOES NOT HAVE ATTR VALUE", cst.Module([node]).code)
     
 class FindComment(cst.CSTVisitor):
     """
