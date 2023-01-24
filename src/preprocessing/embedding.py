@@ -20,5 +20,5 @@ def vectorize_trim_pad(sequences, embd_model, embed_dim, seq_length):
 
 
 def load_fasttext(path_to_fasttext):
-    embed_model = FastText.load('../models/embedding/embed_if_32.mdl')
+    embed_model = FastText.load(path_to_fasttext)
     return embed_model

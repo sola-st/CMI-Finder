@@ -1,6 +1,8 @@
 from data_generation.libcst_utils import FindDict, FindFloat,FindIdentifiers,FindInteger,FindList,FindSet,FindString,FindTuple
 from data_collection.utils import run_merge_responses
+from preprocessing.preprocessing import tokenize_python
 import random
+import libcst as cst
 
 def get_template(code):
     
@@ -257,7 +259,7 @@ def mutate_message(code_template, targets):
     return mutated
 
 
-def template_preserving_mutation_condition(code_template, n=100):
+def template_preserving_mutation_condition(code_template, condition_templates_h, n=100):
     mutated = []
     candidates = get_candidates_condition(code_template, condition_templates_h)
     random.shuffle(candidates)
@@ -269,7 +271,7 @@ def template_preserving_mutation_condition(code_template, n=100):
     return mutated
 
 
-def template_preserving_mutation_message(code_template, n=100):
+def template_preserving_mutation_message(code_template, message_templates_h, n=100):
     mutated = []
     candidates = get_candidates_message(code_template, message_templates_h)
     random.shuffle(candidates)
@@ -406,9 +408,16 @@ def non_preserving_mutation(code_template, n=100):
     
     return upper_candidates, lower_candidates
 
-def batch_preserving_mutation_condition(batch):
-    return [template_preserving_mutation_condition(t) for t in batch]
+def batch_preserving_mutation_condition(batch, condition_templates_h):
+    return [template_preserving_mutation_condition(t, condition_templates_h) for t in batch]
 
-def batch_preserving_mutation_message(batch):
-    return [template_preserving_mutation_message(t) for t in batch]
+def batch_preserving_mutation_message(batch, message_templates_h):
+    return [template_preserving_mutation_message(t, message_templates_h) for t in batch]
 
+def pattern_mutation(clean_data):
+    templates = run_merge_responses(clean_data, get_template_batch)
+    message_templates_h = construct_message_template_hierarchy(templates)
+    condition_templates_h = construct_condition_template_hierarchy(templates)
+    condition_mutated_data = batch_preserving_mutation_condition(templates, condition_templates_h)
+    message_mutated_data = batch_preserving_mutation_message(templates, message_templates_h)
+    return condition_mutated_data, message_mutated_data

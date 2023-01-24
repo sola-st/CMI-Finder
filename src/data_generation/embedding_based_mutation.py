@@ -2,6 +2,11 @@ from data_generation.libcst_utils import FindIdentifiers, FindInteger, FindFloat
 from preprocessing.preprocessing import tokenize_python
 import numpy as np
 from data_collection.utils import run_merge_responses
+import libcst as cst
+from preprocessing.embedding import load_fasttext
+rename_globals = {}
+
+
 def get_identifiers(if_stmt):
     
     operators = ['==', '!=', '>=', '<=', '>', '<', 'in', 'not', 'is', 'and', 'or']
@@ -85,7 +90,7 @@ def get_new_op(op):
     }   
     return np.random.choice(operators_map[op][0], 1, p = operators_map[op][1])[0]
 
-def replace_identifiers(d):
+def replace_identifiers(d, embed_model):
     inconsistent = []
     consistent = []
     
@@ -213,13 +218,14 @@ def replace_name_in_string(mess, mess_ids):
     code_repl += "print(%s)" % mess_string
     return exec(code_repl)
 
-def replace_identifiers_batch(dt):
+def replace_identifiers_batch(dt, path_to_embed_model):
+    embed_model = load_fasttext(path_to_embed_model)
     inconsistent = []
     hard_inconsistent = []
     for d in dt:
-        incon, hard_incon = replace_identifiers(d)
+        incon, hard_incon = replace_identifiers(d, embed_model)
         inconsistent += incon
         hard_inconsistent += hard_incon
     
-    return [inconsistent, hard_inconsistent, '0']
+    return inconsistent, hard_inconsistent
 

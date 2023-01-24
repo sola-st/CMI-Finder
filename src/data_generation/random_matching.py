@@ -1,6 +1,7 @@
 import random
 
-def random_matching(data, n = 1000000):
+def random_matching(data):
+    n = len(data)
     rm = []
     for i in range(n):
         p1 = random.choice(data)

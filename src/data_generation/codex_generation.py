@@ -66,9 +66,9 @@ def complete_from_message(message):
     return condition 
 
 
-def generate_inconsistent(target_statements, cool_down=60):
+def generate_inconsistent(target_statements, cool_down=60, api_key="NO API KEY"):
     codex_comp = []
-    for inc in target_statements[:1]:
+    for inc in target_statements:
         d, cond, message = inc
         try:
             tree = cst.parse_statement(d)

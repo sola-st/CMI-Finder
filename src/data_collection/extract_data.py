@@ -35,7 +35,7 @@ def extract_condition_message_pairs(source, output_dir, cat="file", n=1):
                 functions.extend(json.load(ffd))
         
     pairs = run_merge_responses(functions, extract_batch_,n_cpus_a=n)
-    
+
     pairs_inline = []
     for p in pairs:
         stmts = p[0]
