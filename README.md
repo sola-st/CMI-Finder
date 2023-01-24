@@ -1,12 +1,12 @@
 # CMI-Finder
-This artifact is a full functional and reusable implementation of the approach and results presented in the paper "When to Say What: Learning to Find Condition-Message Inconsistencies" https://link.to.paper. The goal of CMI-Finder is to automatically detect condition-message inconsistencies. An example of condition message inconsistency is given below:
+This artifact is a full functional and reusable implementation of the approach and results presented in the paper "When to Say What: Learning to Find Condition-Message Inconsistencies" https://link.to.paper. The goal of CMI-Finder is to automatically detect condition-message inconsistencies. An example of condition message inconsistency is given below where the operator "or" in the condition is inconsistent with the logic of the message (or --> and):
 ```Python
-if condition:
-    raise Exception("message")
+if len(bits) != 4 or len(bits) != 6 :
+    raise template.TemplateSyntaxError("%r takes exactly\
+        four or six arguments (second argument must be ’\
+            as’)" % str(bits[0]))
 ```
 The package includes all of the data and code used in the study, as well as utility scripts for visualizing and exporting our findings as they appear in the paper.
-
-## Requirements
 
 ## How to use the artifact?
 You can import and test the artificat in three different ways:
