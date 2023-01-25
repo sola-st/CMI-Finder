@@ -1,6 +1,6 @@
 import numpy as np
 from keras.models import Sequential
-from keras.models import Input
+from tensorflow.python.keras.models import Input
 from keras.layers import LSTM
 from keras.layers import Dense
 from keras.layers import RepeatVector
@@ -10,10 +10,10 @@ from keras.regularizers import L1L2
 from keras.models import Model
 import tensorflow as tf
 from keras.utils.vis_utils import plot_model
-from keras.layers.merge import concatenate
+from keras.layers import concatenate
 from keras.models import load_model
-from tensorflow.keras import optimizers
-
+from keras import optimizers
+import os
 
 
 class BILSTM():
@@ -34,7 +34,7 @@ class BILSTM():
         rreg = self.hyper_params.get("rreg", L1L2(0., 0.))
         fnn_activation = self.hyper_params.get("fnn_activation", "relu")
         output_activation = self.hyper_params.get("output_activation", "sigmoid")
-        layer1 = Bidirectional(LSTM(lstm_layers[0], return_sequences = True, kernel_regularizer=kreg, recurrent_regularizer=rreg), input_shape = (timesteps, data_dim))
+        layer1 = Bidirectional(LSTM(lstm_layers[0], return_sequences = True, kernel_regularizer=kreg, recurrent_regularizer=rreg), input_shape = (self.timesteps, self.data_dim))
         model.add(layer1)
         for i in range(1, len(lstm_layers) -1, 1):
             model.add(Bidirectional(LSTM(lstm_layers[i], return_sequences = True, kernel_regularizer=kreg, recurrent_regularizer=rreg)))
@@ -100,5 +100,8 @@ class BILSTM():
             data, labels,validation_data=validation_data, epochs = epochs, batch_size = batch_size, verbose=verbose, callbacks=callbacks)
         self.history = history
 
+    def save_model(self, folder):
+        self.model.save(os.path.join(folder, "bilstm_{0}_{1}.mdl".format(self.timesteps, self.data_dim)))
+    
     def evaluate(self):
         pass

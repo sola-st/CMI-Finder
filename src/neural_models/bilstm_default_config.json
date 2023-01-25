@@ -1,0 +1,9 @@
+{
+    "layers": [64, 64],
+    "timesteps": 64,
+    "data_dim": 32,
+    "dense": 128,
+    "hyper_params": {
+        
+    }
+}
