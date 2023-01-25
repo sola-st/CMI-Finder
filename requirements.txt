@@ -11,4 +11,6 @@ datasets
 tensorflow
 keras
 matplotlib
-sklearn
+scikit-learn
+gensim
+prettytable
