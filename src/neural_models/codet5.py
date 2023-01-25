@@ -11,8 +11,7 @@ import random
 import numpy as np
 from prettytable import PrettyTable
 import json
-from utils import load_data_from_jsonl
-
+import os
 
 class FineTuneModel():
 
@@ -75,7 +74,7 @@ class FineTuneModel():
                     "learning_rate": 5e-05,
                     "weight_decay": 0.001,
                     "max_grad_norm": 1.0,
-                    "max_steps": 10000,
+                    "max_steps": 40,
                     "lr_scheduler_type": "linear",
                     "warmup_steps": 100,
                     "logging_strategy": "steps",
@@ -102,7 +101,7 @@ class FineTuneModel():
             "learning_rate": 5e-05,
             "weight_decay": 0.001,
             "max_grad_norm": 1.0,
-            "max_steps": 10000,
+            "max_steps": 40,
             "lr_scheduler_type": "linear",
             "warmup_steps": 100,
             "logging_strategy": "steps",
@@ -251,3 +250,6 @@ class FineTuneCodeT5(FineTuneModel):
         trainer = self.__trainer()
         last_checkpoint = get_last_checkpoint(self.output_dir)
         trainer.train(resume_from_checkpoint=last_checkpoint)
+
+    def save_model(self, folder):
+        self.model.save_pretrained(os.path.join(folder, "t5_classification_final.mdl"))
