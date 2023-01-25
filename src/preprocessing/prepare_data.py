@@ -214,7 +214,7 @@ if __name__ == "__main__":
             elif key in ["consistent", "inconsistent", "random"]:
                 inconsistent_data += prepare_map[key](data_load)
 
-        consistent_data = [c for c in consistent_data if c != []]
+        consistent_data = [c for c in consistent_data if c != []]   
         inconsistent_data = [c for c in inconsistent_data if c != []]
 
         def construct_full_if(c, m):

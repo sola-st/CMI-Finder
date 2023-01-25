@@ -15,7 +15,7 @@ parser.add_argument(
 
 parser.add_argument(
     "--class0",
-    help="path to data file for consistent statements",
+    help="path to data file for consistent statementcls",
     required=True
 )
 
