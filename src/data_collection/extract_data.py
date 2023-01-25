@@ -25,17 +25,20 @@ parser.add_argument(
 
 def extract_condition_message_pairs(source, output_dir, cat="file", n=1):
     functions = []
+    print("Loading functions list")
     if cat == "file":
         with open(source) as sf:
             functions = json.load(sf)
     elif cat == "dir":
         functions_files = [d for d in os.listdir(source) if d.endswith(".json")]
         for func_file in functions_files:
-            with open(func_file) as ffd:
+            with open(os.path.join(source, func_file)) as ffd:
                 functions.extend(json.load(ffd))
-        
+    
+    print("Extracting condition-message statements")
     pairs = run_merge_responses(functions, extract_batch_,n_cpus_a=n)
 
+    print("Cleaning and simplifying codition message statements")
     pairs_inline = []
     for p in pairs:
         stmts = p[0]
@@ -67,6 +70,7 @@ def extract_condition_message_pairs(source, output_dir, cat="file", n=1):
             if 'print' in m[: m.find('(')] or 'log' in m[: m.find('(')] or 'raise' in m[: m.find('(')]:
                 print_raise_pairs.append((c, m))
     not_empty_strings = exclude_empty_strings(print_raise_pairs)
+    
     print("{0} pairs were extracted, writing data to: ".format(len(not_empty_strings)), os.path.join(output_dir, "extracted_condition_message_pairs.json"))
     with open(os.path.join(output_dir, "extracted_condition_message_pairs.json"), 'w') as edj:
         json.dump(not_empty_strings, edj)
@@ -78,7 +82,7 @@ if __name__ == "__main__":
     n = int(args.n)
     if os.path.isfile(source):
         extract_condition_message_pairs(source, output, cat="file", n=n)
-    elif os.path.isfolder(source):
+    elif os.path.isdir(source):
         extract_condition_message_pairs(source, output, cat="dir", n=n)
     else:
         raise FileNotFoundError("Could not find the specified path")

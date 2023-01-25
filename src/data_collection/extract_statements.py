@@ -153,7 +153,7 @@ def extract_ifs_tree(func_def):
     try:
         func_tree = cst.parse_module(func_def).body[0]
     except:
-        return if_stmts_tree 
+        return if_stmts_tree, func_def
     statements = func_tree.body.body
     
     count = 1
@@ -281,7 +281,9 @@ def extract_batch_(raise_functions):
                 if len(stmts_pairs)!=0:
                     pairs.append((stmts_pairs, func_def))
             except Exception as e:
-                print(e)
+                pass
+                # warning supressed
+                #print(e)
     return pairs
 
 
