@@ -67,6 +67,7 @@ def extract_condition_message_pairs(source, output_dir, cat="file", n=1):
             if 'print' in m[: m.find('(')] or 'log' in m[: m.find('(')] or 'raise' in m[: m.find('(')]:
                 print_raise_pairs.append((c, m))
     not_empty_strings = exclude_empty_strings(print_raise_pairs)
+    print("{0} pairs were extracted, writing data to: ".format(len(not_empty_strings)), os.path.join(output_dir, "extracted_condition_message_pairs.json"))
     with open(os.path.join(output_dir, "extracted_condition_message_pairs.json"), 'w') as edj:
         json.dump(not_empty_strings, edj)
 

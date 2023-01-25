@@ -47,12 +47,12 @@ if __name__ == "__main__":
         goal = int(args.size)
         base_dir = args.output
         search_and_clone(goal=goal, auth=(user_name, token), base_dir=base_dir)
-        projects = [d for d in os.listdir(base_dir) if not d.endswith(".json")]
-        ifs_by_project = collect_data(projects, base_dir, args.n)
+        #projects = [d for d in os.listdir(base_dir) if not d.endswith(".json")]
+        #ifs_by_project = collect_data(projects, base_dir, args.n)
         ## save to json
-        ifstmts_to_json(ifs_by_project, save_name=os.path.join(args.output, "if_stmts_by_project_random"))
-        print("Data collection finished")
-        print("Results were saved to:", os.path.join(args.output, "if_stmts_by_project_random.json"))
+        #ifstmts_to_json(ifs_by_project, save_name=os.path.join(args.output, "if_stmts_by_project_random"))
+        print("Collection finished")
+        #print("Results were saved to:", os.path.join(args.output, "if_stmts_by_project_random.json"))
 
     elif strategy == "list":
         if not os.path.exists(args.strategy_arg):
@@ -64,11 +64,11 @@ if __name__ == "__main__":
             projects = lstf.read().splitlines()
         os.mkdir(os.path.join(args.output, "cloned_repo_folder_123546865"))
         clone_projects(projects, len(projects), base_dir=os.path.join(args.output, "cloned_repo_folder_123546865"))
-        projects_list = os.listdir(os.path.join(args.output, "cloned_repo_folder_123546865"))
-        ifs_by_project = collect_data(projects_list, os.path.join(args.output, "cloned_repo_folder_123546865"), args.n)
-        ifstmts_to_json(ifs_by_project, save_name=os.path.join(args.output, "if_stmts_by_project_list"))
-        print("Data collection finished")
-        print("Results were saved to:", os.path.join(args.output, "if_stmts_by_project_list.json"))
+        #projects_list = os.listdir(os.path.join(args.output, "cloned_repo_folder_123546865"))
+        #ifs_by_project = collect_data(projects_list, os.path.join(args.output, "cloned_repo_folder_123546865"), args.n)
+        #ifstmts_to_json(ifs_by_project, save_name=os.path.join(args.output, "if_stmts_by_project_list"))
+        print("Collection finished")
+        #print("Results were saved to:", os.path.join(args.output, "if_stmts_by_project_list.json"))
     elif strategy == "folder":
         if not os.path.isdir(args.strategy_arg):
             print("The folder you provided does not exist")

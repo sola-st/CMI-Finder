@@ -111,13 +111,13 @@ The bellow command executes the embedding mutation strategy on the list of condi
     For this step it is recommended to use one cpu only.
 
     ```
-    python -m data_generation.generate --strategy embedding --file ./output_folder/condition-message-pairs.json -n 1 --output ./output_folder --model /models/emebdding/embed_if_32.mdl
+    python -m data_generation.generate --strategy embed --file ./output_folder/condition-message-pairs.json -n 1 --output ./output_folder --model ./models/embedding/embed_if_32.mdl/embed_if_32.mdl
     ```
 
 * <b>All mutations at once </b>
 The following command will apply all mutation on the given data
     ```
-    python -m data_generation.generate --strategy all --file ./output_folder/condition-message-pairs.json -n 1 --output ./output_folder --model /models/emebdding/embed_if_32.mdl
+    python -m data_generation.generate --strategy all --file ./output_folder/condition-message-pairs.json -n 1 --output ./output_folder --model ./models/embedding/embed_if_32.mdl/embed_if_32.mdl
     ```
 #### Data preparation
 This step prepares the data to be used for training by a neural model

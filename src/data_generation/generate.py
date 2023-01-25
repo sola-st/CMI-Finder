@@ -56,7 +56,7 @@ if __name__ == "__main__":
     if strategy == "condition":
         mutations = apply_condition_mutations(statements)
     elif strategy == "message":
-        mutations = [(c, mutate_message(m)) for c, m in statements]
+        mutations = [((c, m), mutate_message(m)) for c, m in statements]
     elif strategy == "pattern":
         mutations = pattern_mutation(statements)
     elif strategy == "embed":
@@ -69,12 +69,15 @@ if __name__ == "__main__":
     elif strategy == "all":
         mutations = {
             "condition": apply_condition_mutations(statements),
-            "message": [(c, mutate_message(m)) for c, m in statements],
+            "message": [((c, m), mutate_message(m)) for c, m in statements],
             "pattern": pattern_mutation(statements),
             "embed": replace_identifiers_batch(statements, path_to_model),
             "random": random_matching(statements),
             "codex": generate_inconsistent(statements)
         }
+    else:
+        raise ValueError("Strategy should be one of condition, message, pattern, embed, random, codex, all")
+        
     with open(os.path.join(output, strategy+"_inconsistent_data.json"), "w") as exp_data:
         json.dump(mutations, exp_data)
 

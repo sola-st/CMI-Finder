@@ -224,8 +224,8 @@ def replace_identifiers_batch(dt, path_to_embed_model):
     hard_inconsistent = []
     for d in dt:
         incon, hard_incon = replace_identifiers(d, embed_model)
-        inconsistent += incon
-        hard_inconsistent += hard_incon
+        inconsistent.append((d, incon))
+        hard_inconsistent.append((d, hard_incon))
     
     return inconsistent, hard_inconsistent
 

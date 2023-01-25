@@ -46,6 +46,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
     rootdir = args.folder
     output = args.output
+    print("Extraction Started")
     functions = scrape_folder(rootdir)
+    print("{0} functions were extracted, saving data to: ".format(len(functions)), os.path.join(output, "extracted_functions.json"))
     with open(os.path.join(output, "extracted_functions.json"), "w") as out:
         json.dump(functions, out)

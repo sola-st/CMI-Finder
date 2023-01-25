@@ -104,23 +104,72 @@ def prepare_condition_data(condition_data):
     inconsistent_data = [stmt for stmt, l in zip(*condition_data) if l == 1.]
     return consistent_data, inconsistent_data
 
+def prepare_condition_triplet(condition_data):
+    op_mutation_dict_c = {}
+    ones = []
+
+    for stmt, l in zip(*condition_data):  
+        if l == 1.0:
+            ones.append(stmt)
+        else:
+            op_mutation_dict_c[tuple(stmt)] = ones
+            ones = []
+    return op_mutation_dict_c
+
 
 def prepare_message_data(message_data):
     print("Loading condition data")
     inconsistent_data = []
+    consistent_data = []
     for msd in message_data:
+        consistent_data.append(msd[0])
         if msd[1]!=[]:
             for m in msd[1]:
-                inconsistent_data.append((msd[0], m))
+                inconsistent_data.append((msd[0][0], m))
     
     return consistent_data, inconsistent_data
+
+def prepare_message_triplet(message_data):
+    op_mutation_dict_c = {}
+    for stmt, mml in zip(*message_data):  
+        op_mutation_dict_c[tuple(stmt)] = [(stmt[0], m) for m in mml]
+    return op_mutation_dict_c
+
+def make_triplet_from_dict(t_dict, anchor = 'condition'):
+    triplets = []
+    if anchor == 'condition':
+        for k in t_dict:
+            a = k[0]
+            p = k[1]
+            for pair in t_dict[k]:
+                n = pair[1]
+                triplets.append((a, p, n))
+    elif anchor == 'message':
+        for k in t_dict:
+            a = k[1]
+            p = k[0]
+            for pair in t_dict[k]:
+                n = pair[0]
+                triplets.append((a, p, n))
+    return triplets
 
 def prepare_pattern_data(pattern_data):
     print("Loading pattern data")
     condition_data = pattern_data[0]
+    condition_data = [cd[1] for cd in condition_data]
     message_data = pattern_data[1]
+    message_data = [md[1] for md in message_data if md!=[]]
 
     return condition_data, message_data
+
+def prepare_pattern_triplet(pattern_data):
+    condition_data = pattern_data[0]
+    condition_triplets = [(cd[0][1], cd[0][0], cd[1][0]) for cd in condition_data]
+
+    message_data = pattern_data[0]
+    message_triplets = [(md[0][0], md[0][1], md[1][1]) for md in message_data]
+
+    return message_triplets, condition_triplets
 
 def prepare_codex_data(codex_data):
     return None
@@ -128,7 +177,24 @@ def prepare_codex_data(codex_data):
 def prepare_tr_data(tr_data):
     tr = tr_data[0]
     tr_hard = tr_data[1]
-    return tr, tr_hard
+    tr_inconsistent = []
+    tr_hard_inconsistent = []
+    for t in tr:
+        tr_inconsistent.extend(t[1])
+    for t in tr_hard:
+        tr_hard_inconsistent.extedn(t[1])
+    return tr_inconsistent, tr_hard_inconsistent
+
+def prepare_tr_triplet(tr_data):
+    tr = tr_data[0]
+    tr_hard = tr_data[1]
+    tr_inconsistent = []
+    tr_hard_inconsistent = []
+    for t in tr:
+        tr_inconsistent.extend(t[1])
+    for t in tr_hard:
+        tr_hard_inconsistent.extedn(t[1])
+    return tr_inconsistent, tr_hard_inconsistent
 
 def prepare_rm_data(rm_data):
     return rm_data
