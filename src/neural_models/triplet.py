@@ -11,7 +11,6 @@ from keras.layers import LSTM
 from keras.models import Model
 #import tensorflow as tf
 #from keras.utils.vis_utils import plot_model
-from keras.layers.merge import concatenate
 
 from keras.layers import LeakyReLU
 
@@ -54,6 +53,40 @@ class DistanceLayer(layers.Layer):
         normalize_n = (tf.reduce_sum(tf.square(anchor), -1) + tf.reduce_sum(tf.square(negative), -1))/2
         
         return (ap_distance/normalize_p, an_distance/normalize_n)
+
+
+def triplet_embedding_bilstm(timesteps=32, data_dim=32, lstm_layers=[128, 128]):
+    input_layer = Input(shape = (timesteps, data_dim))
+    layer1 = LSTM(lstm_layers[0], return_sequences = True, input_shape = (timesteps, data_dim))(input_layer)
+    layer2 = LSTM(lstm_layers[1], return_sequences = False, input_shape = (timesteps, data_dim))(layer1)
+    #flat = Flatten()(att_l)
+    output = Dense(lstm_layers[-1]*2)(layer2)
+    
+    model = Model(inputs=[input_layer], outputs=output, name = 'BILSTM_ENCODER')
+    return model
+
+def triplet_embedding_net(net = 'bilstm'):
+    if net == 'fnn':
+        return triplet_embedding_fnn()
+    elif net == 'bilstm':
+        return triplet_embedding_bilstm()
+
+def loss_model():
+    embedding = triplet_embedding_net()
+
+    anchor_input = layers.Input(name="anchor", shape= (32, 32))
+    positive_input = layers.Input(name="positive", shape= (32, 32))
+    negative_input = layers.Input(name="negative", shape= (32, 32))
+
+    distances = DistanceLayer(name='TripletLossLayer')(
+        embedding(anchor_input),
+        embedding(positive_input),
+        embedding(negative_input),
+    )
+    network = Model(
+    inputs=[anchor_input, positive_input, negative_input], outputs=distances
+    )
+    return network, embedding
 
 
 class TripletModel(Model):
@@ -117,3 +150,41 @@ class TripletModel(Model):
         # We need to list our metrics here so the `reset_states()` can be
         # called automatically.
         return [self.loss_tracker]
+
+
+def create_triplet_model(margin=1, lambda1=1, lambda2=1):
+    network, embedding = loss_model()
+    network.summary()
+
+    boundaries = [10*700, 20*700, 30*700, 40*700]
+    values = [0.002, 0.001, 0.0004, 0.0003, 0.0001]
+    learning_rate_fn = optimizers.schedules.PiecewiseConstantDecay(
+        boundaries, values)
+
+    trimod = TripletModel(network, embedding, margin = margin, lambda1=lambda1, lambda2=lambda2)
+    trimod.compile(optimizer=optimizers.Adam(learning_rate=learning_rate_fn))
+
+    return trimod
+
+
+def train(model, data, epochs, batch_size, val_prop):
+    val = 200 * 1000
+    reshaped = data.transpose(1,0, 2, 3)
+
+    early_stop = tf.keras.callbacks.EarlyStopping(
+    monitor="val_loss",
+    min_delta=0.0005,
+    patience=10,
+    verbose=2,
+    mode="auto",
+    baseline=None,
+    restore_best_weights=True,
+    ) 
+
+    size = len(reshaped[0])
+    val = int(val_prop*size)
+    model.fit([reshaped[0][:-val], reshaped[1][:-val], reshaped[2][:-val]], 
+            validation_data = [reshaped[0][-val:], reshaped[1][-val:], reshaped[2][-val:]],
+            epochs=epochs, batch_size = batch_size, callbacks=[early_stop])
+
+    return model

@@ -4,7 +4,7 @@ import json
 from .codex_generation import generate_inconsistent
 from .condition_message_mutation import apply_condition_mutations, mutate_message
 from .embedding_based_mutation import replace_identifiers_batch
-from .random_matching import random_matching
+from .random_matching import random_matching, random_matching_triplet
 from .pattern_based_mutation import pattern_mutation
 from data_collection.utils import run_merge_responses
 import os
@@ -66,6 +66,8 @@ if __name__ == "__main__":
     elif strategy == "codex":
         api_key = getpass.getpass("Please provide your openai api key(paste it here):")
         mutations = generate_inconsistent(statements, api_key=api_key)
+    elif strategy =="random_triplet":
+        mutations = random_matching_triplet(statements)
     elif strategy == "all":
         mutations = {
             "condition": apply_condition_mutations(statements),
@@ -77,7 +79,7 @@ if __name__ == "__main__":
         }
     else:
         raise ValueError("Strategy should be one of condition, message, pattern, embed, random, codex, all")
-        
+
     with open(os.path.join(output, strategy+"_inconsistent_data.json"), "w") as exp_data:
         json.dump(mutations, exp_data)
 

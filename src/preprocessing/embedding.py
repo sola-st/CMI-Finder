@@ -22,3 +22,10 @@ def vectorize_trim_pad(sequences, embd_model, embed_dim, seq_length):
 def load_fasttext(path_to_fasttext):
     embed_model = FastText.load(path_to_fasttext)
     return embed_model
+
+
+def embed_triplet(data, embed_model, vector_size, seq_length):
+    triplet0_vec, _= vectorize_trim_pad([ad[0] for ad in data], embed_model, vector_size, seq_length)
+    triplet1_vec, _= vectorize_trim_pad([ad[1] for ad in data], embed_model, vector_size, seq_length)
+    triplet2_vec, _= vectorize_trim_pad([ad[2] for ad in data], embed_model, vector_size, seq_length)
+    return np.array([tri for tri in zip(triplet0_vec, triplet1_vec, triplet2_vec)])

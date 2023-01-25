@@ -93,6 +93,10 @@ The bellow command executes the random mutation strategy on the list of conditio
     python -m data_generation.generate --strategy random --file ./output_folder/condition-message-pairs.json -n 16 --output ./output_folder
     ```
 
+    Exceptionaly for this strategy, if the generated data is going to be used for training the triplet model, the user should run the following instead of the above:
+    ```
+    python -m data_generation.generate --strategy random_triplet --file ./output_folder/condition-message-pairs.json -n 16 --output ./output_folder
+    ```
 * <b>Pattern mutation </b>
 The bellow command executes the pattern mutation strategy on the list of condition-message statements given in the file ./output_folder/condition-message-pairs.json using 16 cpus and outputing the results to the folder ./output_folder
     ```

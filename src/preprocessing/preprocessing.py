@@ -61,7 +61,6 @@ def tokenize_if_block(code):
     except Exception as e:
         print(e)
 
-
 def vectorize_if_block(tokens, model):
     vector = []
     for t in tokens:
@@ -93,3 +92,9 @@ def tokenize_python(code):
             clean_tokens.append(t)
     
     return clean_tokens
+
+
+def tokenize_triplets(triplets):
+    return [
+            (tokenize_python(t[0]), tokenize_python(t[1]), tokenize_python(t[2])) for t in triplets
+    ]

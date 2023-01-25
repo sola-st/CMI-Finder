@@ -1,8 +1,8 @@
 import argparse
 import libcst as cst
-from .preprocessing import tokenize_python
+from .preprocessing import tokenize_python, tokenize_triplets
 import random
-from .embedding import load_fasttext, vectorize_trim_pad
+from .embedding import load_fasttext, vectorize_trim_pad, embed_triplet
 import numpy as np
 import json
 import os
@@ -104,7 +104,7 @@ def prepare_condition_data(condition_data):
     inconsistent_data = [stmt for stmt, l in zip(*condition_data) if l == 1.]
     return consistent_data, inconsistent_data
 
-def prepare_condition_triplet(condition_data):
+def prepare_condition_dict(condition_data):
     op_mutation_dict_c = {}
     ones = []
 
@@ -129,10 +129,10 @@ def prepare_message_data(message_data):
     
     return consistent_data, inconsistent_data
 
-def prepare_message_triplet(message_data):
+def prepare_message_dict(message_data):
     op_mutation_dict_c = {}
-    for stmt, mml in zip(*message_data):  
-        op_mutation_dict_c[tuple(stmt)] = [(stmt[0], m) for m in mml]
+    for msd in message_data:  
+        op_mutation_dict_c[tuple(msd[0])] = [(msd[0][0], m) for m in msd[1]]
     return op_mutation_dict_c
 
 def make_triplet_from_dict(t_dict, anchor = 'condition'):
@@ -152,6 +152,21 @@ def make_triplet_from_dict(t_dict, anchor = 'condition'):
                 n = pair[0]
                 triplets.append((a, p, n))
     return triplets
+
+def make_condition_triplet(condition_data):
+    cond_triplets = []
+    cond_dict = prepare_condition_dict(condition_data)
+    cond_triplets += make_triplet_from_dict(cond_dict, anchor="condition")
+    cond_triplets += make_triplet_from_dict(cond_dict, anchor="message")
+
+    return cond_triplets
+
+def make_message_triplet(message_data):
+    message_triplets = []
+    message_dict = prepare_message_dict(message_data)
+    message_triplets += make_triplet_from_dict(message_dict, anchor="condition")
+    message_triplets += make_triplet_from_dict(message_dict, anchor="message")
+    return message_triplets
 
 def prepare_pattern_data(pattern_data):
     print("Loading pattern data")
@@ -191,9 +206,9 @@ def prepare_tr_triplet(tr_data):
     tr_inconsistent = []
     tr_hard_inconsistent = []
     for t in tr:
-        tr_inconsistent.extend(t[1])
+        tr_inconsistent.extend([(t[0][0], t[0][1], it[1]) if it[0] == t[0][0] else (t[0][1], t[0][0], it[0]) for it in t[1]])
     for t in tr_hard:
-        tr_hard_inconsistent.extedn(t[1])
+        tr_hard_inconsistent.extend([(t[0][0], t[0][1], it[1]) if it[0] == t[0][0] else (t[0][1], t[0][0], it[0]) for it in t[1]])
     return tr_inconsistent, tr_hard_inconsistent
 
 def prepare_rm_data(rm_data):
@@ -212,8 +227,8 @@ if __name__ == "__main__":
     sources = args.sources
     output = args.output
     embed_model = args.embed_model
-    length = args.length
-    vector = args.vector
+    length = int(args.length)
+    vector = int(args.vector)
 
     with open(sources) as srcs:
         data = json.load(srcs)
@@ -247,10 +262,17 @@ if __name__ == "__main__":
 
         consistent_data = [c for c in consistent_data if c != []]
         inconsistent_data = [c for c in inconsistent_data if c != []]
+
+        consistent_data = [tuple(cd) for cd in consistent_data]
+        inconsistent_data = [tuple(cd) for cd in inconsistent_data]
+
+        consistent_data = list(set(consistent_data))
+        inconsistent_data = list(set(inconsistent_data))
+
         vectorized_consistent = clean_tokenize_vectorize(consistent_data, embed_model, length, vector)
         vectorized_inconsistent = clean_tokenize_vectorize(inconsistent_data, embed_model, length, vector)
-        np.save(os.path.join(output, "vectorized_consistent.npy"), vectorized_consistent)
-        np.save(os.path.join(output, "vectorized_inconsistent.npy"), vectorized_inconsistent)
+        np.save(os.path.join(output, "bilstm_vectorized_consistent.npy"), vectorized_consistent)
+        np.save(os.path.join(output, "bilstm_vectorized_inconsistent.npy"), vectorized_inconsistent)
 
     elif model == "codet5":
         prepare_map = {
@@ -288,6 +310,9 @@ if __name__ == "__main__":
         consistent_data = [construct_full_if(c, m) for c, m in consistent_data]
         inconsistent_data = [construct_full_if(c, m) for c, m in inconsistent_data]
         
+        consistent_data = list(set(consistent_data))
+        inconsistent_data = list(set(inconsistent_data))
+
         labeled_data = []
 
         for cd in consistent_data:
@@ -302,4 +327,35 @@ if __name__ == "__main__":
         dump_jsonl(labeled_data, os.path.join(output, "codet5_formatted_data.jsonl"))
 
     elif model == "triplet":
-        pass
+        prepare_map = {
+            "condition": make_condition_triplet,
+            "message": make_message_triplet,
+            "codex": prepare_codex_data,
+            "embed": prepare_tr_triplet,
+            "random_triplet": prepare_rm_data,
+            "pattern": prepare_pattern_triplet,
+            "consistent": prepare_consistent_data,
+            "inconsistent": prepare_inconsistent_data
+        }
+
+        triplets = []
+        for key in data:
+            print(key)
+            with open(data[key]) as dkl:
+                data_load = json.load(dkl)
+            if key in ["condition", "message"]:
+                triplets += prepare_map[key](data_load)
+            elif key in ["pattern", "embed", "codex", "random_triplet"]:
+                d1, d2 = prepare_map[key](data_load)
+                triplets += d1
+                triplets += d2
+            elif key in ["consistent", "inconsistent"]:
+                triplets += prepare_map[key](data_load)
+
+        triplets = [tuple(t) for t in triplets]
+        triplets = list(set(triplets))
+        all_triplets_tokenized = tokenize_triplets(triplets)
+        print("Loading the embedding model")
+        fft_model = load_fasttext(embed_model)
+        all_triplets_vectorized = embed_triplet(all_triplets_tokenized,fft_model, vector, length)
+        np.save(os.path.join(output, "triplet_data.npy"), all_triplets_vectorized)

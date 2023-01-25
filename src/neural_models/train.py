@@ -4,6 +4,7 @@ import json
 import numpy as np
 import random
 from .codet5 import FineTuneCodeT5
+from .triplet import create_triplet_model, train
 
 parser = argparse.ArgumentParser()
 
@@ -125,7 +126,17 @@ if __name__ == "__main__":
         codet5_finetune.save_model(output)
 
     elif model == "triplet":
-        pass
+        if config is None:
+            with open("src/neural_models/triplet_default_config.json") as dbc:
+                default_config = json.load(dbc)
+        else:
+            with open(config) as cfg:
+                default_config = json.load(cfg)
+        triplet_model = create_triplet_model()
+        train_data = np.load(class0)
+        triplet_model = train(triplet_model, train_data, default_config["epochs"], default_config["batch_size"], default_config["val_prop"])
+        triplet_model.save("triplet_model_saved_copy.mdl")
     else:
         raise ValueError("Unrecognized model, you should provide of these three: codet5, bilstm, triplet")
 
+        
