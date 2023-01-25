@@ -66,7 +66,7 @@ The following command extracts all functions from in all python files in the tre
     python -m data_collection.extract_functions --folder ./scraped_repos --output ./data_files
     ```
 
-<b>Step2: Extract statements. </b>
+* <b>Step2: Extract statements. </b>
 the following command will extract condition-message statements from the list of functions saved in the file ./data_files/extracted_functions using 16 cpus then saves it to the folder ./output_folder
 
     ```
@@ -119,5 +119,24 @@ The following command will apply all mutation on the given data
     ```
     python -m data_generation.generate --strategy all --file ./output_folder/condition-message-pairs.json -n 1 --output ./output_folder --model /models/emebdding/embed_if_32.mdl
     ```
+#### Data preparation
+This step prepares the data to be used for training by a neural model
 
+* <b>Preparing data for BILSTM.</b> The below command prepares the data for the BILSTM model. The command read the data files path saved in the files ./data_paths.json and outputs the results to the folder ./output_folder. In the command, we also sepcify the length of sequence of tokens that we want, the vector size depending on the embedding model (default 32) and the embedding model (fasttext)
+
+    ```
+    python -m preprocessing.prepare_data --model bilstm --sources ./data_paths.json --output ./output_folder --length 64 --vector32
+    ```
+
+* <b>Preparing data for Triplet.</b> The below command prepares the data for the triplet model. The command read the data files path saved in the files ./data_paths.json and outputs the results to the folder ./output_folder. In the command, we also sepcify the length of sequence of tokens that we want, the vector size depending on the embedding model (default 32) and the embedding model (fasttext)
+
+    ```
+    python -m preprocessing.prepare_data --triplet bilstm --sources ./data_paths.json --output ./output_folder --length 64 --vector32
+    ```
+
+* <b>Preparing data for CodeT5.</b> The below command prepares the data for the CodeNet model. The command read the data files path saved in the files ./data_paths.json and outputs the results to the folder ./output_folder. 
+
+    ```
+    python -m preprocessing.prepare_data --model codet5 --sources ./data_paths.json --output ./output_folder --length 64 --vector32
+    ```
 ## Jupyter notebooks
