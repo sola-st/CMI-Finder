@@ -139,4 +139,23 @@ This step prepares the data to be used for training by a neural model
     ```
     python -m preprocessing.prepare_data --model codet5 --sources ./data_paths.json --output ./output_folder --length 64 --vector32
     ```
+
+#### Training the models
+In this part, we will use cmi-finder to train neural models to detect inconsistent condition-message statements.
+
+* <b>Train BILSTM </b>
+    ```
+    python -m neural_models.train --model bilstm --class0 test_output_folder/vectorized_consistent.npy --class1 test_output_folder/vectorized_inconsistent.npy --output test_output_folder/
+    ```
+* <b>Train CodeT5 </b>
+
+    ```
+    python -m neural_models.train --model codet5 --class0 test_output_folder/codet5_formatted_data.jsonl --class1 None --output test_output_folder/
+    ```
+* <b>Train the triplet model</b>
+  ```
+    python -m
+    ```
+
+#### **Test the models**
 ## Jupyter notebooks
