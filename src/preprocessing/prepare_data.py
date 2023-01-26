@@ -6,7 +6,7 @@ from .embedding import load_fasttext, vectorize_trim_pad, embed_triplet
 import numpy as np
 import json
 import os
-
+from data_collection.utils import run_merge_responses
 
 parser = argparse.ArgumentParser()
 parser.add_argument(
@@ -45,6 +45,10 @@ parser.add_argument(
     default=32
 )
 
+parser.add_argument(
+    "-n",
+    default=1
+)
 def dump_jsonl(data, output_path, append=False):
     """
     Write list of objects to a JSON lines file.
@@ -67,10 +71,7 @@ def load_jsonl(input_path):
     print('Loaded {} records from {}'.format(len(data), input_path))
     return data
 
-
-def clean_tokenize_vectorize(data, embed_model_path, seq_length, vector_size):
-    print("Cleaning data")
-    # keep only syntactically correct mutated data
+def filter_parsable(data):
     parsable_data = []
     for d in data:
         try:
@@ -79,6 +80,13 @@ def clean_tokenize_vectorize(data, embed_model_path, seq_length, vector_size):
             parsable_data.append(d)
         except:
             pass
+    return parsable_data
+    
+def clean_tokenize_vectorize(data, embed_model_path, seq_length, vector_size, n=1):
+    print("Cleaning data")
+    # keep only syntactically correct mutated data
+    parsable_data = []
+    parsable_data = run_merge_responses(data, filter_parsable, n_cpus_a=n)
 
     print("Tokenizing data")
     tokenized_data = [(tokenize_python(c), tokenize_python(m)) for c, m in parsable_data]
@@ -89,13 +97,11 @@ def clean_tokenize_vectorize(data, embed_model_path, seq_length, vector_size):
     print("Loading the embedding model")
     embed_model = load_fasttext(embed_model_path)
 
+    print("Vectorizing data")
     vectorized_data, _ = vectorize_trim_pad(
         [c+m for c, m in tokenized_data if not len(c+m)> seq_length], 
         embed_model, vector_size, seq_length)
 
-    vectorized_data, _ = vectorize_trim_pad(
-        [c+m for c, m in tokenized_data if not len(c+m)> seq_length], 
-        embed_model, vector_size, seq_length)
     return vectorized_data
 
 def prepare_condition_data(condition_data):
@@ -234,7 +240,7 @@ if __name__ == "__main__":
     embed_model = args.embed_model
     length = int(args.length)
     vector = int(args.vector)
-
+    n = int(args.n)
     with open(sources) as srcs:
         data = json.load(srcs)
     if model == "bilstm":
@@ -277,9 +283,9 @@ if __name__ == "__main__":
         consistent_data = list(set(consistent_data))
         inconsistent_data = list(set(inconsistent_data))
 
-        vectorized_consistent = clean_tokenize_vectorize(consistent_data, embed_model, length, vector)
-        vectorized_inconsistent = clean_tokenize_vectorize(inconsistent_data, embed_model, length, vector)
-        
+        vectorized_consistent = clean_tokenize_vectorize(consistent_data, embed_model, length, vector, n=n)
+        vectorized_inconsistent = clean_tokenize_vectorize(inconsistent_data, embed_model, length, vector, n=n)
+
         np.save(os.path.join(output, "bilstm_vectorized_consistent.npy"), vectorized_consistent)
         np.save(os.path.join(output, "bilstm_vectorized_inconsistent.npy"), vectorized_inconsistent)
 

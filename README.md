@@ -11,7 +11,7 @@ The package includes all of the data and code used in the study, as well as util
 ## How to use the artifact?
 You can import and test the artificat in three different ways:
 1. [In our shared docker](#docker-setup)
-2. [As a pyhon package through command line](#python-package-cli)
+2. [As a pyhon package through command line](#python-package-setup)
 
 ## Docker setup
 Before you start this setup, make sure docker is installed on your host machine. If not, please refer to: https://docs.docker.com/get-docker/
@@ -69,7 +69,8 @@ In this step cmi-finder either scrapes randomly a configurable number of reposit
     ```
 
 <b>Note: </b> all the used folders should exist priorly
-#### **Data extraction**
+
+### **Data extraction**
 In this step cmi-finder extracts functions from all python files given in a directory and all its subtree then extracts condition-message statements from those functions.
 
 * <b> Step1: Extract functions. </b>
@@ -134,7 +135,7 @@ The following command will apply all mutation on the given data
     ```
     python -m data_generation.generate --strategy all --file ./demo_folder/condition_message_pairs.json -n 1 --output ./demo_folder --model ./models/embedding/embed_if_32.mdl/embed_if_32.mdl
     ```
-#### **Data preparation**
+### **Data preparation**
 This step prepares the data collected and generated to be used for training by different neural models.
 
 * <b>Preparing data for BILSTM.</b> The below command prepares the data for the BILSTM model. The command read the data files paths saved in the files ./demo_data/data_paths.json and outputs the results to the folder ./demo_data
@@ -171,7 +172,7 @@ This step prepares the data collected and generated to be used for training by d
     python -m preprocessing.prepare_data --model codet5 --sources ./data_paths.json --output ./output_folder --length 64 --vector32
     ```
 
-### **Training the models**
+### **Train the models**
 In this part, we will use cmi-finder to train neural models to detect inconsistent condition-message statements.
 
 * <b>Train BILSTM </b>
@@ -189,4 +190,3 @@ In this part, we will use cmi-finder to train neural models to detect inconsiste
     ```
 
 ### **Test the models**
-## Jupyter notebooks
