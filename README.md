@@ -73,7 +73,6 @@ python src/data_generation/nltk_setup.py
 ## Usage
 After setting up your environement, whether in Docker image or by installing the python package, make sure you are inside the folder CMI-Finder when executing the following commands.
 
-The components of CMI-Finder are presented in the below figure ![](overview_fig.png). For each component of CMI-Finder, we give the command to interract with the component.
 ### **Data collection**
 In this step, cmi-finder either scrapes randomly a configurable number of repositories or it clones a list of repositories given by the user in a text file.
 
@@ -285,3 +284,7 @@ it has three options:
     contains data files we used for test: mainly real inconsistent statements and previously unseen data from 7 repos (check the paper) and the predictions of our models on these data.
 
 Data Folders were intentionally omitted from the repo because they contain large-sized files but they will appear in the final zip package.
+
+spreadsheet
++ outputs + results of table + figure
+and some documentation of the results
