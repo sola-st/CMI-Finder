@@ -104,6 +104,26 @@ def clean_tokenize_vectorize(data, embed_model_path, seq_length, vector_size, n=
 
     return vectorized_data
 
+
+def clean_tokenize_vectorize_no_shuffle(data, embed_model_path, seq_length, vector_size, n=1):
+    print("Cleaning data")
+    # keep only syntactically correct mutated data
+    parsable_data = []
+    parsable_data = run_merge_responses(data, filter_parsable, n_cpus_a=n)
+
+    print("Tokenizing data")
+    tokenized_data = [(tokenize_python(c), tokenize_python(m)) for c, m in parsable_data]
+
+    print("Loading the embedding model")
+    embed_model = load_fasttext(embed_model_path)
+
+    print("Vectorizing data")
+    vectorized_data, _ = vectorize_trim_pad(
+        [c+m for c, m in tokenized_data if not len(c+m)> seq_length], 
+        embed_model, vector_size, seq_length)
+
+    return parsable_data, vectorized_data
+
 def prepare_condition_data(condition_data):
     print("Loading condition data")
     consistent_data = [stmt for stmt,l in zip(*condition_data) if l == 0.]
@@ -187,15 +207,13 @@ def prepare_pattern_triplet(pattern_data):
     print("Loading pattern data")
     condition_data = pattern_data[0]
     condition_triplets = [(cd[0][1], cd[0][0], cd[1][0]) for cd in condition_data]
-
     message_data = pattern_data[0]
     message_triplets = [(md[0][0], md[0][1], md[1][1]) for md in message_data]
-
     return message_triplets, condition_triplets
 
 def prepare_codex_data(codex_data):
     print("Loading codex data")
-    return None
+    return codex_data
 
 def prepare_tr_data(tr_data):
     print("Loading token replacement data")
@@ -283,6 +301,18 @@ if __name__ == "__main__":
         consistent_data = list(set(consistent_data))
         inconsistent_data = list(set(inconsistent_data))
 
+        print("size of consistent data", len(consistent_data))
+        print("size of inconsistentdata", len(inconsistent_data))
+
+        if len(consistent_data) > 300000:
+            print("Downsampling consistent data")
+            random.shuffle(consistent_data)
+            consistent_data = consistent_data[:300000]
+        elif len(inconsistent_data) > 300000:
+            print("Downsampling inconsistent data")
+            random.shuffle(inconsistent_data)
+            inconsistent_data = inconsistent_data[:300000]
+
         vectorized_consistent = clean_tokenize_vectorize(consistent_data, embed_model, length, vector, n=n)
         vectorized_inconsistent = clean_tokenize_vectorize(inconsistent_data, embed_model, length, vector, n=n)
 
@@ -304,17 +334,21 @@ if __name__ == "__main__":
         inconsistent_data = []
         for key in data:
             print(key)
-            with open(data[key]) as dkl:
-                data_load = json.load(dkl)
+            if key in ["condition", "message", "pattern", "embed", "codex", "random", "consistent", "inconsistent"]:
+                print(key)
+                with open(data[key]) as dkl:
+                    data_load = json.load(dkl)
+            else:
+                continue
             if key in ["condition", "message"]:
                 cs, ics = prepare_map[key](data_load)
                 consistent_data += cs
                 inconsistent_data += ics
-            elif key in ["pattern", "embed", "codex"]:
+            elif key in ["pattern", "embed"]:
                 d1, d2 = prepare_map[key](data_load)
                 inconsistent_data += d1
                 inconsistent_data += d2
-            elif key in ["consistent", "inconsistent", "random"]:
+            elif key in ["consistent", "inconsistent", "random", "codex"]:
                 inconsistent_data += prepare_map[key](data_load)
 
         consistent_data = [c for c in consistent_data if c != []]   
@@ -327,6 +361,19 @@ if __name__ == "__main__":
         
         consistent_data = list(set(consistent_data))
         inconsistent_data = list(set(inconsistent_data))
+
+        print("size of consistent data", len(consistent_data))
+        print("size of inconsistentdata", len(inconsistent_data))
+
+        if len(consistent_data) > 300000:
+            print("Downsampling consistent data")
+            random.shuffle(consistent_data)
+            consistent_data = consistent_data[:300000]
+        elif len(inconsistent_data) > 300000:
+            print("Downsampling inconsistent data")
+            random.shuffle(inconsistent_data)
+            inconsistent_data = inconsistent_data[:300000]
+
 
         labeled_data = []
 
@@ -345,7 +392,7 @@ if __name__ == "__main__":
         prepare_map = {
             "condition": make_condition_triplet,
             "message": make_message_triplet,
-            "codex": prepare_codex_data,
+            "codex_triplet": prepare_codex_data,
             "embed": prepare_tr_triplet,
             "random_triplet": prepare_rm_data,
             "pattern": prepare_pattern_triplet,
@@ -356,11 +403,14 @@ if __name__ == "__main__":
         triplets = []
         for key in data:
             print(key)
-            with open(data[key]) as dkl:
-                data_load = json.load(dkl)
-            if key in ["condition", "message"]:
+            if key in ["condition", "message", "pattern", "embed", "codex_triplet", "random_triplet", "consistent", "inconsistent"]:
+                with open(data[key]) as dkl:
+                    data_load = json.load(dkl)
+            else:
+                continue
+            if key in ["condition", "message", "codex_triplet"]:
                 triplets += prepare_map[key](data_load)
-            elif key in ["pattern", "embed", "codex", "random_triplet"]:
+            elif key in ["pattern", "embed", "random_triplet"]:
                 d1, d2 = prepare_map[key](data_load)
                 triplets += d1
                 triplets += d2
@@ -369,8 +419,14 @@ if __name__ == "__main__":
 
         triplets = [tuple(t) for t in triplets]
         triplets = list(set(triplets))
+
+        random.shuffle(triplets)
+        if len(triplets) > 600000:
+            print("Downsampling triplets to 600000")
+            triplets = triplets[:600000]
         all_triplets_tokenized = tokenize_triplets(triplets)
         print("Loading the embedding model")
         fft_model = load_fasttext(embed_model)
+
         all_triplets_vectorized = embed_triplet(all_triplets_tokenized,fft_model, vector, length)
         np.save(os.path.join(output, "triplet_data.npy"), all_triplets_vectorized)

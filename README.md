@@ -77,7 +77,7 @@ In this step cmi-finder extracts functions from all python files given in a dire
 The following command extracts all functions from in all python files in the tree of folder ./demo_repos and outputs the results into the folder ./demo_data
 
     ```
-    python -m data_collection.extract_functions --folder ./demo_repos --output ./demo_data
+    python -m data_collection.extract_functions --source ./demo_repos --output ./demo_data
     ```
 
 * <b>Step2: Extract statements. </b>
@@ -90,35 +90,35 @@ The following command will extract condition-message statements from the list of
 ### **Data generation**
 In this step cmi-finder generates inconsistent condition-message statements from the previously collected likely consistent statements. cmi-finder offers 6 generation techniques. You can invoke all of them at once or each strategy individually. Data generation depend on the existence of a file containig the list of extracted condition message pairs. If you executed the previous steps in data generation, that file is already created. Thus, you can execute what follows.
 
-* <b>Condition mutation. </b>The bellow command executes the condition mutation strategy on the list of condition-message statements given in the file ./demo_data/condition_message_pairs.json using 16 cpus and outputing the results to the folder ./demo_data
+* <b>Condition mutation. </b>The bellow command executes the condition mutation strategy on the list of condition-message statements given in the file ./demo_data/extracted_condition_message_pairs.json using 16 cpus and outputing the results to the folder ./demo_data
     ```
-    python -m data_generation.generate --strategy condition --file ./demo_data/condition_message_pairs.json -n 16 --output ./demo_data
+    python -m data_generation.generate --strategy condition --file ./demo_data/extracted_condition_message_pairs.json -n 16 --output ./demo_data
     ```
     Similarly the same can be done for the following generation strategies:
 * <b>Message mutation </b>
     ```
-    python -m data_generation.generate --strategy message --file ./demo_data/condition_message_pairs.json -n 16 --output ./demo_data
+    python -m data_generation.generate --strategy message --file ./demo_data/extracted_condition_message_pairs.json -n 16 --output ./demo_data
     ```
 
 * <b>Random mutation </b>
     ```
-    python -m data_generation.generate --strategy random --file ./demo_data/condition_message_pairs.json -n 16 --output ./demo_data
+    python -m data_generation.generate --strategy random --file ./demo_data/extracted_condition_message_pairs.json -n 16 --output ./demo_data
     ```
 
     Exceptionaly for this strategy, if the generated data is going to be used for training the triplet model, the user should run the following instead of the above:
     ```
-    python -m data_generation.generate --strategy random_triplet --file ./demo_data/condition_message_pairs.json -n 16 --output ./demo_data
+    python -m data_generation.generate --strategy random_triplet --file ./demo_data/extracted_condition_message_pairs.json -n 16 --output ./demo_data
     ```
 * <b>Pattern mutation </b>
 
     ```
-    python -m data_generation.generate --strategy pattern --file ./demo_data/condition_message_pairs.json -n 16 --output ./demo_data
+    python -m data_generation.generate --strategy pattern --file ./demo_data/extracted_condition_message_pairs.json -n 16 --output ./demo_data
     ```
 
 * <b>Codex mutation </b>
 
     ```
-    python -m data_generation.generate --strategy codex --file ./demo_data/condition_message_pairs.json -n 16 --output ./demo_data
+    python -m data_generation.generate --strategy codex --file ./demo_data/extracted_condition_message_pairs.json -n 16 --output ./demo_data
     ```
 
 * <b>Embedding mutation. </b>
@@ -127,13 +127,13 @@ In this step cmi-finder generates inconsistent condition-message statements from
     For this step it is recommended to use one cpu only.
 
     ```
-    python -m data_generation.generate --strategy embed --file ./demo_data/condition_message_pairs.json -n 1 --output ./demo_data --model ./models/embedding/embed_if_32.mdl/embed_if_32.mdl
+    python -m data_generation.generate --strategy embed --file ./demo_data/extracted_condition_message_pairs.json -n 1 --output ./demo_data --model ./models/embedding/embed_if_32.mdl/embed_if_32.mdl
     ```
 
 * <b>All mutations at once </b>
 The following command will apply all mutation on the given data
     ```
-    python -m data_generation.generate --strategy all --file ./demo_folder/condition_message_pairs.json -n 1 --output ./demo_folder --model ./models/embedding/embed_if_32.mdl/embed_if_32.mdl
+    python -m data_generation.generate --strategy all --file ./demo_folder/extracted_condition_message_pairs.json -n 1 --output ./demo_folder --model ./models/embedding/embed_if_32.mdl/embed_if_32.mdl
     ```
 ### **Data preparation**
 This step prepares the data collected and generated to be used for training by different neural models.
@@ -186,7 +186,17 @@ In this part, we will use cmi-finder to train neural models to detect inconsiste
     ```
 * <b>Train the triplet model</b>
   ```
-    python -m
+    python -m neural_models.train --model triplet --class0 datasets/triplet_data.npy --class1 None --output saved_models
     ```
 
 ### **Test the models**
+
+
+```
+python -m neural_models.predict --model codet5 --target folder --source repos_test_folder/DynaPyt/ --model_path saved_models/t5_classification_final.mdl
+```
+
+
+```
+python -m neural_models.predict --model bilstm --target folder --source repos_test_folder/DynaPyt/ --model_path saved_models/bilstm_64_32.mdl
+```
