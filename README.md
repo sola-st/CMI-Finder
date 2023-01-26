@@ -244,7 +244,7 @@ The following commands test codet5 model on the DynaPyt repository.
 ```
 mkdir -p .temp_predict
 
-python -m neural_models.predict --model codet5 --target folder --source repos_test_folder/DynaPyt/ --model_path saved_models/t5_classification_final.mdl
+python -m neural_models.predict --model codet5 --target folder --source ./test_repos/DynaPyt/ --model_path saved_models/t5_classification_final.mdl
 ```
 
 The following command tests bilstm model on the DynaPyt repository.
