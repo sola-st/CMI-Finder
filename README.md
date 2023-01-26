@@ -13,7 +13,10 @@ You can import and test the artificat in two ways:
 1. [In our shared docker](#docker-setup)
 2. [As a pyhon package through command line](#python-package-setup)
 
-## Docker setup
+Then you can refer to [Usage](#usage) instruction on how to use our framework.
+Finally, in [Data Folders](#data-folders) you find an overview of the shared data that come with this artificat.
+
+## Docker setup [Option 1]
 Before you start this setup, make sure docker is installed on your host machine. If not, please refer to: https://docs.docker.com/get-docker/
 
 ### Step 1: Load image
@@ -21,15 +24,19 @@ Load the docker image that we share in the folder dockers at the root of reposit
 ```
 docker image load -i ./dockers/cmi.image
 ```
-### Step 2: run and attach 
-run and attach the image
+### Step 2: run and attach
+```
+docker container start --attach -i cmi.image:v1
+```
 
 ### Step 3 : activate the virtual environement
+The user is supposed to be inside the docker after step 2.
 ```
-cd CMI-Finder
+cd /home/CMI-Finder
 source .venv/bin/activate
 ```
-## Python package setup
+
+## Python package setup [Option 2]
 We assume you already have Python3.8 installed on your machine.
 In your host machine, navigate to the root of this repository and execute the following:
 
@@ -274,3 +281,5 @@ it has three options:
 
 * ### [testsets](./testsets/): 
     contains data files we used for test: mainly real inconsistent statements and previously unseen data from 7 repos (check the paper) and the predictions of our models on these data.
+
+Data Folders were intentionally omitted from the repo because they contain large-sized files but they will appear in the final zip package.
