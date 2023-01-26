@@ -1,5 +1,5 @@
 # CMI-Finder
-This artifact is a full functional and reusable implementation of the approach and results presented in the paper "When to Say What: Learning to Find Condition-Message Inconsistencies" https://link.to.paper. The goal of CMI-Finder is to automatically detect condition-message inconsistencies. An example of condition message inconsistency is given below where the operator "or" in the condition is inconsistent with the logic of the message (or --> and):
+This artifact is a full functional and reusable implementation of the approach and results presented in the paper ["When to Say What: Learning to Find Condition-Message Inconsistencies"](https://drive.google.com/file/d/15owjJPBpH5y12mjIcFYfcDQk7UvnCOwk). The goal of CMI-Finder is to automatically detect condition-message inconsistencies. An example of condition message inconsistency is given below where the operator "or" in the condition is inconsistent with the logic of the message (or --> and):
 ```Python
 if len(bits) != 4 or len(bits) != 6 :
     raise template.TemplateSyntaxError("%r takes exactly\
@@ -190,13 +190,17 @@ In this part, we will use cmi-finder to train neural models to detect inconsiste
     ```
 
 ### **Test the models**
+The user can use any saved or pretrained models to run prediction on a folder, a python file or a json file containing a list of condition message pairs.
 
-
+The following command tests codet5 model on the DynaPyt repository.
 ```
 python -m neural_models.predict --model codet5 --target folder --source repos_test_folder/DynaPyt/ --model_path saved_models/t5_classification_final.mdl
 ```
 
+The following command tests bilstm model on the DynaPyt repository.
 
 ```
 python -m neural_models.predict --model bilstm --target folder --source repos_test_folder/DynaPyt/ --model_path saved_models/bilstm_64_32.mdl
 ```
+
+COMMAND FOR TRIPLET MODEL NOT YET AVAILABLE
