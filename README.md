@@ -119,7 +119,7 @@ The following command will extract condition-message statements from the list of
     ```
 
 ### **Data generation**
-In this step cmi-finder generates inconsistent condition-message statements from the previously collected likely consistent statements. cmi-finder offers 6 generation techniques. You can invoke all of them at once or each strategy individually. Data generation depend on the existence of a file containig the list of extracted condition message pairs. If you executed the previous steps in data generation, that file is already created. Thus, you can execute what follows.
+In this step, cmi-finder generates inconsistent condition-message statements from the previously collected likely consistent statements. cmi-finder offers 6 generation techniques. You can invoke all of them at once or each strategy individually. Data generation depend on the existence of a file containig the list of extracted condition message pairs. If you executed the previous steps in data generation, that file is already created. Thus, you can execute what follows.
 
 * <b>Condition mutation. </b>The bellow command executes the condition mutation strategy on the list of condition-message statements given in the file ./demo_data/extracted_condition_message_pairs.json using 16 cpus and outputing the results to the folder ./demo_data
     ```
@@ -252,11 +252,13 @@ The following command tests bilstm model on the DynaPyt repository.
 ```
 mkdir -p .temp_predict
 
-
 python -m neural_models.predict --model bilstm --target folder --source test_repos/DynaPyt/ --model_path saved_models/bilstm_64_32.mdl
 ```
 
-COMMAND FOR TRIPLET MODEL NOT YET AVAILABLE
+The following command test the triplet model on Dynapyt repository [NOT AVAILABLE IN CURRENT DOCKER]
+```
+python -m neural_models.predict --model triplet --target folder --source ./test_repos/DynaPyt/ --model_path ./saved_models/triplet_model_saved_copy.mdl/
+```
 
 ### Evaluate [To Do]
 Evaluate models on a labeled data set
