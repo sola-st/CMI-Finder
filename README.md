@@ -6,10 +6,10 @@ if len(bits) != 4 or len(bits) != 6 :
         four or six arguments (second argument must be ’\
             as’)" % str(bits[0]))
 ```
-The package includes all of the data and code used in the study, as well as utility scripts for visualizing and exporting our findings as they appear in the paper.
+The package includes all of the data and code used in the study.
 
 ## How to use the artifact?
-You can import and test the artificat in three different ways:
+You can import and test the artificat in two ways:
 1. [In our shared docker](#docker-setup)
 2. [As a pyhon package through command line](#python-package-setup)
 
@@ -31,6 +31,8 @@ source .venv/bin/activate
 ```
 ## Python package setup
 In your host machine, navigate to the root of this repository and execute the following:
+
+<b>Note:</b> Do not run these steps inside our shared docker image, it's already setup.
  ### Step 1: 
  create a new virtual environment using python3.8 or higher. In the following example, we create a virtual environement named .venv
  ```
@@ -54,7 +56,9 @@ In your host machine, navigate to the root of this repository and execute the fo
  pip install .
  ```
 ## Usage
+After setting up your environement whether in Docker image or by installing the python package, make sure you are inside the folder CMI-Finder when executing the following commands.
 
+For each component of CMI-Finder, we give the available command to call that component.
 ### **Data collection**
 In this step cmi-finder either scrapes randomly a configurable number of repositories or it clones a list of repositories given by the user.
 
