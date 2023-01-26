@@ -30,6 +30,7 @@ cd CMI-Finder
 source .venv/bin/activate
 ```
 ## Python package setup
+We assume you already have Python3.8 installed on your machine.
 In your host machine, navigate to the root of this repository and execute the following:
 
 <b>Note:</b> Do not run these steps inside our shared docker image, it's already setup.
@@ -55,14 +56,28 @@ In your host machine, navigate to the root of this repository and execute the fo
  ```
  pip install .
  ```
+
+ ### step 5:
+  For first time setup, you need to download nltk data files because:
+
+ ```
+python src/data_generation/nltk_setup.py
+```
 ## Usage
-After setting up your environement whether in Docker image or by installing the python package, make sure you are inside the folder CMI-Finder when executing the following commands.
+After setting up your environement, whether in Docker image or by installing the python package, make sure you are inside the folder CMI-Finder when executing the following commands.
 
-For each component of CMI-Finder, we give the available command to call that component.
+For each component of CMI-Finder, we give the command to interract with the component.
 ### **Data collection**
-In this step cmi-finder either scrapes randomly a configurable number of repositories or it clones a list of repositories given by the user.
+In this step, cmi-finder either scrapes randomly a configurable number of repositories or it clones a list of repositories given by the user in a text file.
 
-* <b>Option1: Scraping random repositories from GitHub. </b>The following command will scrape 20 repos randomly from github and save them in ./output_folder
+First, let's a create a folder destination for the cloned repos:
+```
+mkdir -p demo_repos
+```
+
+***Executing one of the following options will prompt you to give a github user name and a corresponding token to scrape repositories.***
+
+* <b>Option1: Scraping random repositories from GitHub. </b>The following command will scrape 20 repos randomly from github and save them in ./demo_repos
     ```
     python -m data_collection.scrape --strategy random --size 20 --output ./demo_repos
     ```
@@ -77,8 +92,13 @@ In this step cmi-finder either scrapes randomly a configurable number of reposit
 ### **Data extraction**
 In this step cmi-finder extracts functions from all python files given in a directory and all its subtree then extracts condition-message statements from those functions.
 
+First let's create a folder destination where to save the output data.
+```
+mkdir -p demo_data
+```
+
 * <b> Step1: Extract functions. </b>
-The following command extracts all functions from in all python files in the tree of folder ./demo_repos and outputs the results into the folder ./demo_data
+The following command extracts all functions from all python files in the tree of folder ./demo_repos and outputs the results into the folder ./demo_data
 
     ```
     python -m data_collection.extract_functions --source ./demo_repos --output ./demo_data
@@ -99,6 +119,7 @@ In this step cmi-finder generates inconsistent condition-message statements from
     python -m data_generation.generate --strategy condition --file ./demo_data/extracted_condition_message_pairs.json -n 16 --output ./demo_data
     ```
     Similarly the same can be done for the following generation strategies:
+
 * <b>Message mutation </b>
     ```
     python -m data_generation.generate --strategy message --file ./demo_data/extracted_condition_message_pairs.json -n 16 --output ./demo_data
@@ -119,7 +140,7 @@ In this step cmi-finder generates inconsistent condition-message statements from
     python -m data_generation.generate --strategy pattern --file ./demo_data/extracted_condition_message_pairs.json -n 16 --output ./demo_data
     ```
 
-* <b>Codex mutation </b>
+* <b>Codex mutation [BUGGY, DO NOT TRY THIS YET]</b>
 
     ```
     python -m data_generation.generate --strategy codex --file ./demo_data/extracted_condition_message_pairs.json -n 16 --output ./demo_data
@@ -134,7 +155,7 @@ In this step cmi-finder generates inconsistent condition-message statements from
     python -m data_generation.generate --strategy embed --file ./demo_data/extracted_condition_message_pairs.json -n 1 --output ./demo_data --model ./models/embedding/embed_if_32.mdl/embed_if_32.mdl
     ```
 
-* <b>All mutations at once </b>
+* <b>All mutations at once [BUGGY BECAUSE OF CODEX MUTATION]</b>
 The following command will apply all mutation on the given data
     ```
     python -m data_generation.generate --strategy all --file ./demo_folder/extracted_condition_message_pairs.json -n 1 --output ./demo_folder --model ./models/embedding/embed_if_32.mdl/embed_if_32.mdl
@@ -144,7 +165,7 @@ This step prepares the data collected and generated to be used for training by d
 
 * <b>Preparing data for BILSTM.</b> The below command prepares the data for the BILSTM model. The command read the data files paths saved in the files ./demo_data/data_paths.json and outputs the results to the folder ./demo_data
 
-    The content of the file ./demo_data/data_paths.json is a dictionary of of the paths of different data files. When creating your own files, make sure to respect the name of the keys as presented in the following example:
+    The content of the file ./demo_data/data_paths.json is a dictionary of of the paths of different data files. When creating your own files, make sure to respect the name of the keys as presented in the following example and to include only files that paths that already exist. If you are doing this inside the docker image, there is already a file containing these paths, you can edit it based on you needs (using nano editor for example).
     ```Json
     {
         "condition": "test_output_folder/condition_inconsistent_data.json",
@@ -161,50 +182,95 @@ This step prepares the data collected and generated to be used for training by d
     In the command, we also sepcify the length of sequence of tokens that we want and the vector size depending on the embedding model (default 32) and the embedding model (fasttext)
 
     ```
-    python -m preprocessing.prepare_data --model bilstm --sources ./demo_data/data_paths.json --output ./demo_data --length 64 --vector32
+    python -m preprocessing.prepare_data --model bilstm --sources ./demo_data/data_paths.json --output ./demo_data --length 64 --vector 32
     ```
 
 * <b>Preparing data for Triplet.</b> The below command prepares the data for the triplet model. The command read the data files path saved in the files ./data_paths.json and outputs the results to the folder ./output_folder. In the command, we also sepcify the length of sequence of tokens that we want, the vector size depending on the embedding model (default 32) and the embedding model (fasttext)
 
     ```
-    python -m preprocessing.prepare_data --triplet triplet --sources ./demo_data/data_paths.json --output ./output_folder --length 32 --vector32
+    python -m preprocessing.prepare_data --model triplet --sources ./demo_data/data_paths.json --output ./demo_data --length 32 --vector 32
     ```
 
 * <b>Preparing data for CodeT5.</b> The below command prepares the data for the CodeT5 model. The command read the data files path saved in the files ./data_paths.json and outputs the results to the folder ./output_folder. 
 
     ```
-    python -m preprocessing.prepare_data --model codet5 --sources ./data_paths.json --output ./output_folder --length 64 --vector32
+    python -m preprocessing.prepare_data --model codet5 --sources ./demo_data/data_paths.json --output ./demo_data
     ```
 
 ### **Train the models**
 In this part, we will use cmi-finder to train neural models to detect inconsistent condition-message statements.
 
+First let's create a directory where to save the trained models.
+```
+mkdir -p saved_models
+```
+
 * <b>Train BILSTM </b>
     ```
-    python -m neural_models.train --model bilstm --class0 test_output_folder/vectorized_consistent.npy --class1 test_output_folder/vectorized_inconsistent.npy --output test_output_folder/
+    python -m neural_models.train --model bilstm --class0 ./demo_data/bilstm_vectorized_consistent.npy --class1 ./demo_data/bilstm_vectorized_inconsistent.npy --output ./saved_models
     ```
 * <b>Train CodeT5 </b>
 
     ```
-    python -m neural_models.train --model codet5 --class0 test_output_folder/codet5_formatted_data.jsonl --class1 None --output test_output_folder/
+    python -m neural_models.train --model codet5 --class0 ./demo_data/codet5_formatted_data.jsonl --class1 None --output ./saved_models
     ```
 * <b>Train the triplet model</b>
-  ```
-    python -m neural_models.train --model triplet --class0 datasets/triplet_data.npy --class1 None --output saved_models
+
+    ```
+    python -m neural_models.train --model triplet --class0 ./demo_data/triplet_data.npy --class1 None --output ./saved_models
     ```
 
 ### **Test the models**
 The user can use any saved or pretrained models to run prediction on a folder, a python file or a json file containing a list of condition message pairs.
 
-The following command tests codet5 model on the DynaPyt repository.
+First let's clone a random repo to use it for test:
+
 ```
+mkdir -p test_repos
+
+cd test_repos && git clone https://github.com/sola-st/DynaPyt.git
+
+cd ..
+```
+
+The following commands test codet5 model on the DynaPyt repository.
+```
+mkdir -p .temp_predict
+
 python -m neural_models.predict --model codet5 --target folder --source repos_test_folder/DynaPyt/ --model_path saved_models/t5_classification_final.mdl
 ```
 
 The following command tests bilstm model on the DynaPyt repository.
 
 ```
-python -m neural_models.predict --model bilstm --target folder --source repos_test_folder/DynaPyt/ --model_path saved_models/bilstm_64_32.mdl
+mkdir -p .temp_predict
+
+
+python -m neural_models.predict --model bilstm --target folder --source test_repos/DynaPyt/ --model_path saved_models/bilstm_64_32.mdl
 ```
 
 COMMAND FOR TRIPLET MODEL NOT YET AVAILABLE
+
+### Evaluate [To Do]
+Evaluate models on a labeled data set
+(similar to predict but calculate ACC, F1 based on labels)
+
+### Reproduce all the steps on our dataset [SCRIPT UNDER CONSTRUCTION]
+it has three options:
+
+- from raw data: the script will apply the previous steps on the raw data and reexecute all steps (takes a long time)
+- from prepared data: the script will start from already prepared data
+- from preptrained models: the script will assume everything is done and evaluate model on test data only
+
+
+## Data Folders
+* ### [datasets](./datasets/): 
+    contains raw data, extracted statements, extracted functions, generated data, preprocessed data (ready for training)
+
+
+* ### [models](./models/): 
+    contains fasttext used for embedding, and also our trained models: CodeT5, BILSTM and Triplet
+
+
+* ### [testsets](./testsets/): 
+    contains data files we used for test: mainly real inconsistent statements and previously unseen data from 7 repos (check the paper) and the predictions of our models on these data.
