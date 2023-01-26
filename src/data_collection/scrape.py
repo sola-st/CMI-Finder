@@ -18,7 +18,7 @@ parser.add_argument(
     "--size", help="The number of repositories to scrape")
 
 parser.add_argument(
-    "--strategy_arg", required = True, help="""
+    "--strategy_arg", help="""
     This is a complementary input to the strategy, it works as follows:
         when strategy == random: this argument is not required and has no effect
         when strategy == list: this argument should contain the path to the txt file containing the list of repositories
@@ -55,6 +55,8 @@ if __name__ == "__main__":
         #print("Results were saved to:", os.path.join(args.output, "if_stmts_by_project_random.json"))
 
     elif strategy == "list":
+        if args.strategy_arg is None:
+            raise ValueError("--strategy_arg should be provided in the command line (path to file containing repos list)")
         if not os.path.exists(args.strategy_arg):
             print("The path to the file you provided does not exist")
             print("The path of the entry point is at:", os.getcwd())
