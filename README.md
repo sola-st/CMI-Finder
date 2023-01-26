@@ -88,11 +88,7 @@ mkdir -p demo_repos
     python -m data_collection.scrape --strategy random --size 20 --output ./demo_repos
     ```
 
-    <div class="alert alert-block alert-success">
-    <b>Output:</b> This is the output of the step
-    </div>
-
-    For our experiments, we used random scraper to collect our set of repositories. The list of repositories that we scraped is given in the file **./datasets/cmi_finder_repos_list.json**
+    **Output:** For our experiments, we used random scraper to collect our set of repositories. The list of repositories that we scraped is given in the file **./datasets/cmi_finder_repos_list.json**
 
 * <b> Option2: Scraping a list of repositories from GitHub. </b> The following command will scrape the list of repositories given in the file target_repos.txt and save them to the folder ./output_folder
 
@@ -116,7 +112,7 @@ The following command extracts all functions from all python files in the tree o
     ```
     python -m data_collection.extract_functions --source ./demo_repos --output ./demo_data
     ```
-    For our set of used repositories, the output of this command is saved in the file: **./datasets/extracted_functions.json**
+    **Output:** For our set of used repositories, the output of this command is saved in the file: **./datasets/extracted_functions.json**
 
 * <b>Step2: Extract statements. </b>
 The following command will extract condition-message statements from the list of functions saved in the file ./demo_data/extracted_functions.json using 16 cpus then saves it to the folder ./demo_data
@@ -124,11 +120,15 @@ The following command will extract condition-message statements from the list of
     ```
     python -m data_collection.extract_data --source ./demo_data/extracted_functions.json -n 16 --output ./demo_data
     ```
-    The extracted list of statements that we got in our experiments in saved in the file: **./datasets/condition_message_pairs.json**
+    **Output:** The extracted list of statements that we got in our experiments is saved in the file: **./datasets/condition_message_pairs.json**
+
 ### **Data generation**
-In this step, cmi-finder generates inconsistent condition-message statements from the previously collected likely consistent statements. cmi-finder offers 6 generation techniques. You can invoke all of them at once or each strategy individually. Data generation depend on the existence of a file containig the list of extracted condition message pairs. If you executed the previous steps in data generation, that file is already created. Thus, you can execute what follows.
+In this step, cmi-finder generates inconsistent condition-message statements from the previously collected likely consistent statements. cmi-finder offers 6 generation techniques. You can invoke all of them at once or each strategy individually. Data generation depend on the existence of a file containig the list of extracted condition message pairs. 
+
+The generated inconsistent statements that we got based on our extracted statements (in the previous steps) are in the folder ./datasets with file name ending with inconsistent_data.json.
 
 * <b>Condition mutation. </b>The bellow command executes the condition mutation strategy on the list of condition-message statements given in the file ./demo_data/extracted_condition_message_pairs.json using 16 cpus and outputing the results to the folder ./demo_data
+
     ```
     python -m data_generation.generate --strategy condition --file ./demo_data/extracted_condition_message_pairs.json -n 16 --output ./demo_data
     ```
@@ -175,17 +175,6 @@ The following command will apply all mutation on the given data
     python -m data_generation.generate --strategy all --file ./demo_folder/extracted_condition_message_pairs.json -n 1 --output ./demo_folder --model ./models/embedding/embed_if_32.mdl/embed_if_32.mdl
     ```
 
-    The generated inconsistent statements that we got based on our list statements are in the following files:
-    
-    - condition mutation: ./datasets/condition_inconsistent_data.json
-    - message mutation: ./datasets/message_inconsistent_data.json
-    - pattern mutation: ./datasets/pattern_inconsistent_data.json
-    - random mutation: ./datasets/random_inconsistent_data.json
-    - random mutation triplet: ./datasets/random_triplet_inconsistent_data.json
-    - codex mutation: ./datasets/codex_inconsistet_data.json
-    - codex mutation triplet: ./datasets/codex_triplet_inconsistent_data.json
-    - token replacement: ./embed_inconsistent_data.json
-
 ### **Data preparation**
 This step prepares the data collected and generated to be used for training by different neural models.
 
@@ -210,19 +199,22 @@ This step prepares the data collected and generated to be used for training by d
     ```
     python -m preprocessing.prepare_data --model bilstm --sources ./demo_data/data_paths.json --output ./demo_data --length 64 --vector 32
     ```
-    The result of executing this step on our data produces two files: ./datasets/bilstm_vectorized_consistent.npy and ./datasets/bilstm_vectorized_inconsistent.npy. Thos two files are enough to launch the training of the BILSTM model.
+    **Output:** The result of executing this step on our data produces two files: ./datasets/bilstm_vectorized_consistent.npy and ./datasets/bilstm_vectorized_inconsistent.npy. Thos two files are enough to launch the training of the BILSTM model.
 
 * <b>Preparing data for Triplet.</b> The below command prepares the data for the triplet model. The command read the data files path saved in the files ./data_paths.json and outputs the results to the folder ./output_folder. In the command, we also sepcify the length of sequence of tokens that we want, the vector size depending on the embedding model (default 32) and the embedding model (fasttext)
 
     ```
     python -m preprocessing.prepare_data --model triplet --sources ./demo_data/data_paths.json --output ./demo_data --length 32 --vector 32
     ```
+    **Output:** The result of executing this step on our data produces the file ./datasets/triplet_data.npy which is enough to launch the training of the Triplet model.
 
 * <b>Preparing data for CodeT5.</b> The below command prepares the data for the CodeT5 model. The command read the data files path saved in the files ./data_paths.json and outputs the results to the folder ./output_folder. 
 
     ```
     python -m preprocessing.prepare_data --model codet5 --sources ./demo_data/data_paths.json --output ./demo_data
     ```
+
+    **Output:** The result of executing this step on our data produces the file ./datasets/codet5_formatted_data.jsonl which is enough to launch the training of the CodeT5.
 
 ### **Train the models**
 In this part, we will use cmi-finder to train neural models to detect inconsistent condition-message statements.
@@ -236,16 +228,22 @@ mkdir -p saved_models
     ```
     python -m neural_models.train --model bilstm --class0 ./demo_data/bilstm_vectorized_consistent.npy --class1 ./demo_data/bilstm_vectorized_inconsistent.npy --output ./saved_models
     ```
+    **Output:** Our saved model from this step can be found in ./models/pretrained/bilstm
+
 * <b>Train CodeT5 </b>
 
     ```
     python -m neural_models.train --model codet5 --class0 ./demo_data/codet5_formatted_data.jsonl --class1 None --output ./saved_models
     ```
+
+    **Output:** Our saved model from this step can be found in ./models/pretrained/codet5
+
 * <b>Train the triplet model</b>
 
     ```
     python -m neural_models.train --model triplet --class0 ./demo_data/triplet_data.npy --class1 None --output ./saved_models
     ```
+    **Output:** Our saved model from this step can be found in ./models/pretrained/triplet
 
 ### **Test the models**
 The user can use any saved or pretrained models to run prediction on a folder, a python file or a json file containing a list of condition message pairs.
@@ -267,6 +265,8 @@ mkdir -p .temp_predict
 python -m neural_models.predict --model codet5 --target folder --source ./test_repos/DynaPyt/ --model_path saved_models/t5_classification_final.mdl
 ```
 
+**Output:** Running this on our preselected set of previously unseen repositories produces the predictions saved in the file...
+
 The following command tests bilstm model on the DynaPyt repository.
 
 ```
@@ -274,11 +274,13 @@ mkdir -p .temp_predict
 
 python -m neural_models.predict --model bilstm --target folder --source test_repos/DynaPyt/ --model_path saved_models/bilstm_64_32.mdl
 ```
+**Output:** Running this on our preselected set of previously unseen repositories produces the predictions saved in the file...
 
 The following command test the triplet model on Dynapyt repository [NOT AVAILABLE IN CURRENT DOCKER]
 ```
 python -m neural_models.predict --model triplet --target folder --source ./test_repos/DynaPyt/ --model_path ./saved_models/triplet_model_saved_copy.mdl/
 ```
+**Output:** Running this on our preselected set of previously unseen repositories produces the predictions saved in the file...
 
 ### Evaluate [To Do]
 Evaluate models on a labeled data set
@@ -291,6 +293,7 @@ it has three options:
 - from prepared data: the script will start from already prepared data
 - from preptrained models: the script will assume everything is done and evaluate model on test data only
 
+**Output:** Running this pastbug fixes produces produces the predictions saved in the file... and also allows to produces the figure...
 
 ## Data Folders
 * ### [datasets](./datasets/): 
