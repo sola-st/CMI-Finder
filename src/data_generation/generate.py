@@ -53,22 +53,32 @@ if __name__ == "__main__":
     with open(file_path) as fp:
         statements = json.load(fp)
 
+    statements = list(set([tuple(stmt) for stmt in statements]))
+
     if strategy == "condition":
+        print("Generating {0} mutations".format(strategy))
         mutations = apply_condition_mutations(statements)
     elif strategy == "message":
+        print("Generating {0} mutations".format(strategy))
         mutations = [((c, m), mutate_message(m)) for c, m in statements]
     elif strategy == "pattern":
+        print("Generating {0} mutations".format(strategy))
         mutations = pattern_mutation(statements)
     elif strategy == "embed":
-        mutations = replace_identifiers_batch(statements, path_to_model)
+        print("Generating {0} mutations".format(strategy))
+        mutations = replace_identifiers_batch(statements[:10000], path_to_model)
     elif strategy == "random":
+        print("Generating {0} mutations".format(strategy))
         mutations = random_matching(statements)
     elif strategy == "codex":
+        print("Generating {0} mutations".format(strategy))
         api_key = getpass.getpass("Please provide your openai api key(paste it here):")
         mutations = generate_inconsistent(statements, api_key=api_key)
     elif strategy =="random_triplet":
+        print("Generating {0} mutations".format(strategy))
         mutations = random_matching_triplet(statements)
     elif strategy == "all":
+        print("Generating {0} mutations".format(strategy))
         mutations = {
             "condition": apply_condition_mutations(statements),
             "message": [((c, m), mutate_message(m)) for c, m in statements],
@@ -78,7 +88,9 @@ if __name__ == "__main__":
             "codex": generate_inconsistent(statements)
         }
     else:
-        raise ValueError("Strategy should be one of condition, message, pattern, embed, random, codex, all")
+        raise ValueError("Strategy should be one of condition, message, pattern, embed, random, random_triplet, codex, all")
+
+    print("Saving the results to:", os.path.join(output, strategy+"_inconsistent_data.json"))
 
     with open(os.path.join(output, strategy+"_inconsistent_data.json"), "w") as exp_data:
         json.dump(mutations, exp_data)

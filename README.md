@@ -12,37 +12,50 @@ The package includes all of the data and code used in the study, as well as util
 You can import and test the artificat in three different ways:
 1. [In our shared docker](#docker-setup)
 2. [As a pyhon package through command line](#python-package-cli)
-3. [Through jupyter notebooks](#jupyter-notebooks)
 
 ## Docker setup
+Before you start this setup, make sure docker is installed on your host machine. If not, please refer to: https://docs.docker.com/get-docker/
 
-## Python package cli
-### I. Installation
- #### Step1: 
+### Step 1: Load image
+Load the docker image that we share in the folder dockers at the root of repository.
+```
+docker image load -i ./dockers/cmi.image
+```
+### Step 2: run and attach 
+run and attach the image
+
+### Step 3 : activate the virtual environement
+```
+cd CMI-Finder
+source .venv/bin/activate
+```
+## Python package setup
+In your host machine, navigate to the root of this repository and execute the following:
+ ### Step 1: 
  create a new virtual environment using python3.8 or higher. In the following example, we create a virtual environement named .venv
  ```
  python3.8 -m venv .venv
  ```
- #### Step2: 
+ ### Step 2: 
  activate the environement (make sure you are in the parent directory of .venv)
  ```
  source .venv/bin/activate
  ```
- #### Step3: 
+ ### Step 3: 
  install requirements by using our requirements.txt file located at the root of this repository
  ```
  pip install --upgrade pip
  pip install -r requirements.txt
  ```
 
- #### step4
+ ### step 4:
  install our package cmi-finder
  ```
  pip install .
  ```
-### II. Usage
+## Usage
 
-#### **Data collection**
+### **Data collection**
 In this step cmi-finder either scrapes randomly a configurable number of repositories or it clones a list of repositories given by the user.
 
 * <b>Option1: Scraping random repositories from GitHub. </b>The following command will scrape 20 repos randomly from github and save them in ./output_folder
@@ -73,7 +86,7 @@ The following command will extract condition-message statements from the list of
     python -m data_collection.extract_data --source ./demo_data/extracted_functions.json -n 16 --output ./demo_data
     ```
 
-#### **Data generation**
+### **Data generation**
 In this step cmi-finder generates inconsistent condition-message statements from the previously collected likely consistent statements. cmi-finder offers 6 generation techniques. You can invoke all of them at once or each strategy individually. Data generation depend on the existence of a file containig the list of extracted condition message pairs. If you executed the previous steps in data generation, that file is already created. Thus, you can execute what follows.
 
 * <b>Condition mutation. </b>The bellow command executes the condition mutation strategy on the list of condition-message statements given in the file ./demo_data/condition_message_pairs.json using 16 cpus and outputing the results to the folder ./demo_data
@@ -158,7 +171,7 @@ This step prepares the data collected and generated to be used for training by d
     python -m preprocessing.prepare_data --model codet5 --sources ./data_paths.json --output ./output_folder --length 64 --vector32
     ```
 
-#### **Training the models**
+### **Training the models**
 In this part, we will use cmi-finder to train neural models to detect inconsistent condition-message statements.
 
 * <b>Train BILSTM </b>
@@ -175,5 +188,5 @@ In this part, we will use cmi-finder to train neural models to detect inconsiste
     python -m
     ```
 
-#### **Test the models**
+### **Test the models**
 ## Jupyter notebooks

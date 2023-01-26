@@ -118,7 +118,7 @@ def prepare_condition_dict(condition_data):
 
 
 def prepare_message_data(message_data):
-    print("Loading condition data")
+    print("Loading message data")
     inconsistent_data = []
     consistent_data = []
     for msd in message_data:
@@ -178,6 +178,7 @@ def prepare_pattern_data(pattern_data):
     return condition_data, message_data
 
 def prepare_pattern_triplet(pattern_data):
+    print("Loading pattern data")
     condition_data = pattern_data[0]
     condition_triplets = [(cd[0][1], cd[0][0], cd[1][0]) for cd in condition_data]
 
@@ -187,9 +188,11 @@ def prepare_pattern_triplet(pattern_data):
     return message_triplets, condition_triplets
 
 def prepare_codex_data(codex_data):
+    print("Loading codex data")
     return None
 
 def prepare_tr_data(tr_data):
+    print("Loading token replacement data")
     tr = tr_data[0]
     tr_hard = tr_data[1]
     tr_inconsistent = []
@@ -197,10 +200,11 @@ def prepare_tr_data(tr_data):
     for t in tr:
         tr_inconsistent.extend(t[1])
     for t in tr_hard:
-        tr_hard_inconsistent.extedn(t[1])
+        tr_hard_inconsistent.extend(t[1])
     return tr_inconsistent, tr_hard_inconsistent
 
 def prepare_tr_triplet(tr_data):
+    print("Loading token replacement data")
     tr = tr_data[0]
     tr_hard = tr_data[1]
     tr_inconsistent = []
@@ -212,6 +216,7 @@ def prepare_tr_triplet(tr_data):
     return tr_inconsistent, tr_hard_inconsistent
 
 def prepare_rm_data(rm_data):
+    print("Loading random mutation data")
     return rm_data
 
 def prepare_consistent_data(consistent_data):
@@ -246,9 +251,12 @@ if __name__ == "__main__":
         consistent_data = []
         inconsistent_data = []
         for key in data:
-            print(key)
-            with open(data[key]) as dkl:
-                data_load = json.load(dkl)
+            if key in ["condition", "message", "pattern", "embed", "codex", "random", "consistent", "inconsistent"]:
+                print(key)
+                with open(data[key]) as dkl:
+                    data_load = json.load(dkl)
+            else:
+                continue
             if key in ["condition", "message"]:
                 cs, ics = prepare_map[key](data_load)
                 consistent_data += cs
@@ -271,6 +279,7 @@ if __name__ == "__main__":
 
         vectorized_consistent = clean_tokenize_vectorize(consistent_data, embed_model, length, vector)
         vectorized_inconsistent = clean_tokenize_vectorize(inconsistent_data, embed_model, length, vector)
+        
         np.save(os.path.join(output, "bilstm_vectorized_consistent.npy"), vectorized_consistent)
         np.save(os.path.join(output, "bilstm_vectorized_inconsistent.npy"), vectorized_inconsistent)
 
