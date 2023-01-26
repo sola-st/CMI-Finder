@@ -16,7 +16,7 @@ You can import and test the artificat in two ways:
 Then you can refer to [Usage](#usage) instruction on how to use our framework.
 Finally, in [Data Folders](#data-folders) you find an overview of the shared data that come with this artificat.
 
-## Docker setup [Option 1]
+## Docker setup
 Before you start this setup, make sure docker is installed on your host machine. If not, please refer to: https://docs.docker.com/get-docker/
 
 ### Step 1: Load image
@@ -36,7 +36,7 @@ cd /home/CMI-Finder
 source .venv/bin/activate
 ```
 
-## Python package setup [Option 2]
+## Python package setup
 We assume you already have Python3.8 installed on your machine.
 In your host machine, navigate to the root of this repository and execute the following:
 
