@@ -29,7 +29,12 @@ docker image load -i ./dockers/cmi.image
 docker container start --attach -i cmi.image:v1
 ```
 
-### Step 3 : activate the virtual environement
+### Step 3: Copy important folders to the docker
+```
+docker cp datasets cmi.image.v1:/home/CMI-Finder
+```
+
+### Step 4 : activate the virtual environement
 The user is supposed to be inside the docker after step 2.
 ```
 cd /home/CMI-Finder

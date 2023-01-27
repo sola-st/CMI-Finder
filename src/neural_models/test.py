@@ -105,7 +105,13 @@ if __name__ == "__main__":
         np.save(os.path.join("datasets" ,save_name), predictions.ravel())
 
     elif model == "triplet":
-        all_triplets_vectorized = np.load(path_data)
+        with open(path_data) as srcs:
+            data = json.load(srcs)
+        data_triplet = [(p[0], p[1], p[1]) for p in data]
+        all_triplets_tokenized = tokenize_triplets(data_triplet)
+        fft_model = load_fasttext("models/embedding/embed_if_32.mdl/embed_if_32.mdl")
+
+        all_triplets_vectorized = embed_triplet(all_triplets_tokenized,fft_model, 32, 32)
         test_reshaped = all_triplets_vectorized.transpose(1, 0, 2, 3)
         
         embedding = load_model(source)
