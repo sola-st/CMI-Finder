@@ -356,14 +356,29 @@ Then open the notebook named: ro_curve.ipynb
 
 ## Data Folders
 * ### [datasets](./datasets/): 
-    contains raw data, extracted statements, extracted functions, generated data, preprocessed data (ready for training)
+    contains raw data, extracted statements, extracted functions, generated data, preprocessed data (ready for training) as generated and explained in the above steps.
 
 
 * ### [models](./models/): 
     contains fasttext used for embedding, and also our trained models: CodeT5, BILSTM and Triplet
+    * BILSTM: in pretrained/bilstm_final_version2.mdl
+    * Triplet: in pretrained/embed_trimod_last
+    * CodeT5: in pretrained/t5_classification_final_ep2.mdl
 
 
 * ### [testsets](./testsets/): 
     contains data files we used for testing: mainly real inconsistent statements and previously unseen data from 7 repos (check the paper) and the predictions of our models on these data.
-
+    
+    * New bugs hunt: 
+       - in testsets/huntest_bilstm_print_log_raise_v4.csv
+       - in testsets/hunt_test_trip_dist_v4.csv
+       - in 'testsets/inspection Top50 CodeT5.xlsx'
+       - in testsets/scored_pairs_test.csv
+       - in testsets/combined_v5.xlsx
+    * Past bug fixes:
+        - testsets/real_con_pairs.json
+        - testsets/real_incon_pairs.json
+    * Codex experiment results:
+        - 'testsets/Codex eval.xlsx'
+    
 Data Folders were intentionally omitted from the repo because they contain large-sized files but they will appear in the final zip package.
