@@ -285,10 +285,46 @@ python -m neural_models.predict --model triplet --target folder --source ./test_
 ### Evaluate
 
 #### Evaluation of the models on the artificial data
+To evaluate our model on the same artificial data that we used for evaluation, run the following commands:
 
+* **Evaluate bilstm**
+    ```
+    python -m neural_models.test --model bilstm --source models/pretrained/bilstm --path_data datasets/bilstm_consistent_test.npy --path_labels datasets/bilstm_consistent_labels.npy --export_name bilstm_consistent_preds.npy
 
+    python -m neural_models.test --model bilstm --source models/pretrained/bilstm --path_data datasets/bilstm_inconsistent_test.npy --path_labels datasets/bilstm_inconsistent_labels.npy --export_name bilstm_inconsistent_preds.npy
+    ```
+
+* **Evaluate triplet model**
+    ```
+    python -m neural_models.test --model triplet --source models/pretrained/triplet --path_data datasets/triplet_consistent_test.npy --export_name triplet_consistent_preds.npy
+
+    python -m neural_models.test --model triplet --source models/pretrained/triplet --path_data datasets/triplet_inconsistent_test.npy --export_name triplet_inconsistent_preds.npy
+    ```
+* **Evaluate codet5**
+    ```
+    python -m neural_models.test --model codet5 --source models/pretrained/codet5 --path_data datasets/codet5_consistent_test.jsonl --export_name codet5_consistent_preds.npy
+
+    python -m neural_models.test --model codet5 --source models/pretrained/codet5 --path_data datasets/codet5_inconsistent_test.jsonl --export_name codet5_inconsistent_preds.npy
+    ```
 #### Evaluate the models on real data (past bug fixes)
+* **Evaluate bilstm**
+    ```
+    python -m neural_models.test --model bilstm --source models/pretrained/bilstm --path_data datasets/real_bilstm_consistent_test.npy --path_labels datasets/real_bilstm_consistent_labels.npy --export_name real_bilstm_consistent_preds.npy
 
+    python -m neural_models.test --model bilstm --source models/pretrained/bilstm --path_data datasets/real_bilstm_inconsistent_test.npy --path_labels datasets/real_bilstm_inconsistent_labels.npy --export_name real_bilstm_inconsistent_preds.npy
+    ```
+
+* **Evaluate triplet model**
+    ```
+    python -m neural_models.test --model triplet --source models/pretrained/triplet --path_data datasets/real_triplet_consistent_test.npy --export_name real_triplet_consistent_preds.npy
+
+    python -m neural_models.test --model triplet --source models/pretrained/triplet --path_data datasets/real_triplet_inconsistent_test.npy --export_name real_triplet_inconsistent_preds.npy
+    ```
+* **Evaluate codet5**
+    ```
+    python -m neural_models.test --model codet5 --source models/pretrained/codet5 --path_data datasets/real_codet5_consistent_test.jsonl --export_name real_codet5_consistent_preds.npy
+
+    python -m neural_models.test --model codet5 --source models/pretrained/codet5 --path_data datasets/real_codet5_inconsistent_test.jsonl --export_name real_codet5_inconsistent_preds.npy
 
 #### Analyze results
 To analyze results
@@ -299,6 +335,8 @@ First start the jupyterlab server by executing the following command from within
 ```
 
 Then on your host machine, access the jupyterlab server via the following url: 127.0.0.1:8752
+
+Then open the notebook named: ro_curve.ipynb
 
 ## Data Folders
 * ### [datasets](./datasets/): 
