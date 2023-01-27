@@ -22,11 +22,11 @@ Before you start this setup, make sure docker is installed on your host machine.
 ### Step 1: Load image
 Load the docker image that we share in the folder dockers at the root of the repository.
 ```
-docker image load -i ./dockers/cmi.image
+docker image load -i ./dockers/cmi.image2.tar
 ```
 ### Step 2: run and attach
 ```
-docker container start --attach -i cmi.image:v1
+docker container start --attach -i cmi.image:v2.0
 ```
 
 ### Step 3: Copy important folders to the docker
