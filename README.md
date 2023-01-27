@@ -303,9 +303,9 @@ To evaluate our model on the same artificial data that we used for evaluation, r
 
 * **Evaluate triplet model**
     ```
-    python -m neural_models.test --model triplet --source models/pretrained/triplet --path_data datasets/triplet_consistent_test.npy --export_name triplet_consistent_preds.npy
+    python -m neural_models.test --model triplet --source models/pretrained/embed_trimod_last --path_data datasets/consistent_synthetic_to_v3.json --export_name triplet_consistent_preds.npy
 
-    python -m neural_models.test --model triplet --source models/pretrained/triplet --path_data datasets/triplet_inconsistent_test.npy --export_name triplet_inconsistent_preds.npy
+    python -m neural_models.test --model triplet --source models/pretrained/embed_trimod_last --path_data datasets/inconsistent_synthetic_to_v3.json --export_name triplet_inconsistent_preds.npy
     ```
 * **Evaluate codet5**
     ```
@@ -329,9 +329,9 @@ To evaluate our model on the same artificial data that we used for evaluation, r
     ```
 * **Evaluate codet5**
     ```
-    python -m neural_models.test --model codet5 --source models/pretrained/codet5 --path_data datasets/real_codet5_consistent_test.jsonl --export_name real_codet5_consistent_preds.npy
+    python -m neural_models.test --model codet5 --source models/pretrained/t5_classification_final_ep2.mdl/ --path_data datasets/codet5_consistent_real.jsonl --export_name codet5_consistent_real_preds.npy
 
-    python -m neural_models.test --model codet5 --source models/pretrained/codet5 --path_data datasets/real_codet5_inconsistent_test.jsonl --export_name real_codet5_inconsistent_preds.npy
+    python -m neural_models.test --model codet5 --source models/pretrained/t5_classification_final_ep2.mdl/ --path_data datasets/codet5_inconsistent_real.jsonl --export_name codet5_inconsistent_real_preds.npy
 
 #### Analyze results
 To analyze the results, first start the jupyterlab server by executing the following command from within the folder /home/CMI-Finder

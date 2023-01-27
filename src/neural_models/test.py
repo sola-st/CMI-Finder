@@ -107,7 +107,7 @@ if __name__ == "__main__":
     elif model == "triplet":
         with open(path_data) as srcs:
             data = json.load(srcs)
-        data_triplet = [(p[0], p[1], p[1]) for p in data]
+        data_triplet = [(p[0], p[1], p[1]) for p in data[:1000]]
         all_triplets_tokenized = tokenize_triplets(data_triplet)
         fft_model = load_fasttext("models/embedding/embed_if_32.mdl/embed_if_32.mdl")
 
