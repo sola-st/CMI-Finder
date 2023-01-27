@@ -88,9 +88,9 @@ mkdir -p demo_repos
 
 ***Executing one of the following options will prompt you to give a github user name and a corresponding token to scrape repositories.***
 
-* <b>Option1: Scraping random repositories from GitHub. </b>The following command will scrape 20 repos randomly from github and save them in ./demo_repos
+* <b>Option1: Scraping random repositories from GitHub. </b>The following command will scrape 15 repos randomly from github and save them in ./demo_repos
     ```
-    python -m data_collection.scrape --strategy random --size 20 --output ./demo_repos
+    python -m data_collection.scrape --strategy random --size 15 --output ./demo_repos
     ```
 
     **Output:** For our experiments, we used a random scraper to collect our set of repositories. The list of repositories that we scraped is given in the file **./datasets/cmi_finder_repos_list.json**
@@ -159,13 +159,13 @@ The generated inconsistent statements that we got based on our extracted stateme
     python -m data_generation.generate --strategy pattern --file ./demo_data/extracted_condition_message_pairs.json -n 16 --output ./demo_data
     ```
 
-* <b>Codex mutation [BUGGY, DO NOT TRY THIS YET]</b>
+* <b>Codex mutation</b>
 
     ```
     python -m data_generation.generate --strategy codex --file ./demo_data/extracted_condition_message_pairs.json -n 16 --output ./demo_data
     ```
 
-* <b>Embedding mutation. </b>
+* **Embedding mutation.**
  This strategy in particular needs a fasttext model to calculate embeddings. We give a pretrained fasttext model in ./models/embedding/embed_if_32.mdl
 
     For this step it is recommended to use one cpu only.
@@ -174,7 +174,7 @@ The generated inconsistent statements that we got based on our extracted stateme
     python -m data_generation.generate --strategy embed --file ./demo_data/extracted_condition_message_pairs.json -n 1 --output ./demo_data --model ./models/embedding/embed_if_32.mdl/embed_if_32.mdl
     ```
 
-* <b>All mutations at once [BUGGY BECAUSE OF CODEX MUTATION]</b>
+* **All mutations at once**
 The following command will apply all mutation on the given data
     ```
     python -m data_generation.generate --strategy all --file ./demo_folder/extracted_condition_message_pairs.json -n 1 --output ./demo_folder --model ./models/embedding/embed_if_32.mdl/embed_if_32.mdl
@@ -189,7 +189,7 @@ This step prepares the data collected and generated to be used for training by d
 
     ```Json
     {
-        "condition": "test_output_folder/condition_inconsistent_data.json",
+        "condition": "./demo_data/condition_inconsistent_data.json",
         "message": "./demo_data/message_inconsistent_data.json",
         "pattern": "./demo_data/pattern_inconsistent_data.json",
         "embed": "./demo_data/embed_inconsistent_data.json",
