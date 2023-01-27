@@ -11,14 +11,44 @@ from transformers.models.t5 import T5ForConditionalGeneration
 from transformers import RobertaTokenizer
 from .utils import load_jsonl
 import tensorflow as tf
+import torch
 
 
+def predict_code_t5(model1, tokenizer, data):
+    model1 = model1.to("cpu")
+    index_c = 0
+
+    for test_element in data:
+        test_source = test_element['source']
+        inputs = tokenizer(test_source, return_tensors='pt').input_ids
+        generated_ids = model1.generate(inputs.to("cpu"), num_beams = 5, max_length = 300, num_return_sequences=1)
+        for i, beam_output in enumerate(generated_ids):
+            fix = tokenizer.decode(beam_output, skip_special_tokens=True)
+            print(test_source)
+            print("CodeT5 prediction:", fix)
+            print("=================================================================================")
+        index_c += 1
+
+def score_test_t5(model1, tokenizer, test_stmts):
+    consistent_scores = []
+    for e in test_stmts:
+        decoder_input_ids = torch.tensor([1,267]).unsqueeze(0)
+        inputs = tokenizer(e['source'], return_tensors='pt').input_ids
+        model1(inputs.to("cpu"), decoder_input_ids= decoder_input_ids.to("cpu"))[0]
+        logits = model1(inputs.to("cpu"), decoder_input_ids= decoder_input_ids.to("cpu"))[0]
+        tokens = torch.topk(logits,2)
+        if tokens[1].ravel().cpu().detach().numpy()[0]==267:
+            score = tokens[0].ravel().cpu().detach().numpy()[0]/(tokens[0].ravel().cpu().detach().numpy()[0]+tokens[0].ravel().cpu().detach().numpy()[1])
+        else:
+            score = 1-tokens[0].ravel().cpu().detach().numpy()[0]/(tokens[0].ravel().cpu().detach().numpy()[0]+tokens[0].ravel().cpu().detach().numpy()[1])
+        consistent_scores.append(score)
+    return consistent_scores
 
 parser = argparse.ArgumentParser()
 
 parser.add_argument(
     "--model",
-    hlep="specifiy the name of the model you want to test, one of three options: bilstm, triplet, codet5",
+    help="specifiy the name of the model you want to test, one of three options: bilstm, triplet, codet5",
     required=True
 )
 
@@ -48,29 +78,32 @@ if __name__ == "__main__":
 
     model = args.model
     source = args.source
-    path_data = args.path_labels
+    path_data = args.path_data
     path_labels = args.path_labels
     save_name = args.export_name
 
     if model == "codet5":
-        os.system(
-            "python -m preprocessing.prepare_data --model codet5 --sources .temp_predict/data_map.json --output .temp_predict")
         tokenizer = RobertaTokenizer.from_pretrained('Salesforce/codet5-small')
-        model = T5ForConditionalGeneration.from_pretrained(model_path)
-        data = load_jsonl(".temp_predict/codet5_formatted_data.jsonl")
-        predict_code_t5(model, tokenizer, data)
+        model = T5ForConditionalGeneration.from_pretrained(source)
+        data = load_jsonl(path_data)
+        scores = score_test_t5(model, tokenizer, data)
+        np.save(os.path.join("datasets" ,save_name), np.array(scores))
 
     elif model == "bilstm":
         
         data = np.load(path_data)
         labels = np.load(path_labels)
 
+        print(path_data)
         bilstm = load_model(source)
         
+        print(data.shape)
+        print(labels.shape)
         predictions = bilstm.predict(data, batch_size=1024)
         bilstm.evaluate(data, labels)
 
         np.save(os.path.join("datasets" ,save_name), predictions.ravel())
+
     elif model == "triplet":
         all_triplets_vectorized = np.load(path_data)
         test_reshaped = all_triplets_vectorized.transpose(1, 0, 2, 3)
