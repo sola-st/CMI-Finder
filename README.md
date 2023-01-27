@@ -351,7 +351,3 @@ Then open the notebook named: ro_curve.ipynb
     contains data files we used for test: mainly real inconsistent statements and previously unseen data from 7 repos (check the paper) and the predictions of our models on these data.
 
 Data Folders were intentionally omitted from the repo because they contain large-sized files but they will appear in the final zip package.
-
-spreadsheet
-+ outputs + results of table + figure
-and some documentation of the results
