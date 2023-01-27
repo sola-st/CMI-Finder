@@ -245,7 +245,7 @@ mkdir -p saved_models
     ```
     **Output:** Our saved model from this step can be found in ./models/pretrained/triplet
 
-### **Test the models**
+### **Make predictions**
 The user can use any saved or pretrained models to run prediction on a folder, a python file or a json file containing a list of condition message pairs.
 
 First let's clone a random repo to use it for test:
@@ -265,7 +265,7 @@ mkdir -p .temp_predict
 python -m neural_models.predict --model codet5 --target folder --source ./test_repos/DynaPyt/ --model_path saved_models/t5_classification_final.mdl
 ```
 
-**Output:** Running this on our preselected set of previously unseen repositories produces the predictions saved in the file...
+**Output:** Running this on our preselected set of previously unseen repositories produces the predictions saved in the file ./testsets/scored_pairs_test.csv
 
 The following command tests bilstm model on the DynaPyt repository.
 
@@ -274,26 +274,31 @@ mkdir -p .temp_predict
 
 python -m neural_models.predict --model bilstm --target folder --source test_repos/DynaPyt/ --model_path saved_models/bilstm_64_32.mdl
 ```
-**Output:** Running this on our preselected set of previously unseen repositories produces the predictions saved in the file...
+**Output:** Running this on our preselected set of previously unseen repositories produces the predictions saved in the file ./testesets/hunt_test_bilstm_print_log_raise_v4.csv
 
 The following command test the triplet model on Dynapyt repository [NOT AVAILABLE IN CURRENT DOCKER]
 ```
-python -m neural_models.predict --model triplet --target folder --source ./test_repos/DynaPyt/ --model_path ./saved_models/triplet_model_saved_copy.mdl/
+python -m neural_models.predict --model triplet --target folder --source ./test_repos/DynaPyt/ --model_path ./saved_models/triplet_model_saved_copy.mdl/ 
 ```
-**Output:** Running this on our preselected set of previously unseen repositories produces the predictions saved in the file...
+**Output:** Running this on our preselected set of previously unseen repositories produces the predictions saved in the file ./testsets/hunt_test_trip_dist_v4.csv
 
-### Evaluate [To Do]
-Evaluate models on a labeled data set
-(similar to predict but calculate ACC, F1 based on labels)
+### Evaluate
 
-### Reproduce all the steps on our dataset [SCRIPT UNDER CONSTRUCTION]
-it has three options:
+#### Evaluation of the models on the artificial data
 
-- from raw data: the script will apply the previous steps on the raw data and reexecute all steps (takes a long time)
-- from prepared data: the script will start from already prepared data
-- from preptrained models: the script will assume everything is done and evaluate model on test data only
 
-**Output:** Running this pastbug fixes produces produces the predictions saved in the file... and also allows to produces the figure...
+#### Evaluate the models on real data (past bug fixes)
+
+
+#### Analyze results
+To analyze results
+First start the jupyterlab server by executing the following command from within the folder /home/CMI-Finder
+
+```
+./start_jupyter
+```
+
+Then on your host machine, access the jupyterlab server via the following url: 127.0.0.1:8752
 
 ## Data Folders
 * ### [datasets](./datasets/): 

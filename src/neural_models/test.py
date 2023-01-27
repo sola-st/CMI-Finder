@@ -15,14 +15,15 @@ parser.add_argument(
 )
 
 parser.add_argument(
-    "--test_type",
-    help="either test from a file or a folder or extracted pairs",
+    "--path_data",
+    help="path to the test file or folder or extracted pairs"
 )
 
 parser.add_argument(
-    "--path",
-    help="path to the test file or folder or extracted pairs"
+    "--path_labels",
+    help="path to labels"
 )
+
 if __name__ == "__main__":
     args = parser.parse_args()
 
