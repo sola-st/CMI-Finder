@@ -88,20 +88,20 @@ mkdir -p demo_repos
 
 ***Executing one of the following options will prompt you to give a github user name and a corresponding token to scrape repositories.***
 
-* <b>Option1: Scraping random repositories from GitHub. </b>The following command will scrape 15 repos randomly from github and save them in ./demo_repos
+* **Option1: Scraping random repositories from GitHub.** The following command will scrape 15 repos randomly from github and save them in ./demo_repos
     ```
     python -m data_collection.scrape --strategy random --size 15 --output ./demo_repos
     ```
 
     **Output:** For our experiments, we used a random scraper to collect our set of repositories. The list of repositories that we scraped is given in the file **./datasets/cmi_finder_repos_list.json**
 
-* <b> Option2: Scraping a list of repositories from GitHub. </b> The following command will scrape the list of repositories given in the file target_repos.txt and save them to the folder ./output_folder
+* **Option2: Scraping a list of repositories from GitHub.** The following command will scrape the list of repositories given in the file target_repos.txt and save them to the folder ./output_folder
 
     ```
     python -m data_collection.scrape --strategy list --strategy_arg ./demo_repos/target_repos.txt --output ./demo_repos
     ```
     This command can be used to scrape the same list that we used.
-<b>Note: </b> all the used folders should exist priorly
+**Note:** all the used folders should exist priorly
 
 ### **Data extraction**
 In this step cmi-finder extracts functions from all python files given in a directory and all its subtree then extracts condition-message statements from those functions.
@@ -111,7 +111,7 @@ First let's create a folder destination where to save the output data.
 mkdir -p demo_data
 ```
 
-* <b> Step1: Extract functions. </b>
+*  **Step1: Extract functions.**
 The following command extracts all functions from all python files in the tree of folder ./demo_repos and outputs the results into the folder ./demo_data
 
     ```
@@ -119,7 +119,7 @@ The following command extracts all functions from all python files in the tree o
     ```
     **Output:** For our set of used repositories, the output of this command is saved in the file: **./datasets/extracted_functions.json**
 
-* <b>Step2: Extract statements. </b>
+* **Step2: Extract statements.**
 The following command will extract condition-message statements from the list of functions saved in the file ./demo_data/extracted_functions.json using 16 cpus then saves it to the folder ./demo_data
 
     ```
@@ -132,19 +132,19 @@ In this step, cmi-finder generates inconsistent condition-message statements fro
 
 The generated inconsistent statements that we got based on our extracted statements (in the previous steps) are in the folder ./datasets with file name ending with inconsistent_data.json.
 
-* <b>Condition mutation. </b>The bellow command executes the condition mutation strategy on the list of condition-message statements given in the file ./demo_data/extracted_condition_message_pairs.json using 16 cpus and outputting the results to the folder ./demo_data
+* **Condition mutation.** The bellow command executes the condition mutation strategy on the list of condition-message statements given in the file ./demo_data/extracted_condition_message_pairs.json using 16 cpus and outputting the results to the folder ./demo_data
 
     ```
     python -m data_generation.generate --strategy condition --file ./demo_data/extracted_condition_message_pairs.json -n 16 --output ./demo_data
     ```
     Similarly the same can be done for the following generation strategies:
 
-* <b>Message mutation </b>
+* **Message mutation**
     ```
     python -m data_generation.generate --strategy message --file ./demo_data/extracted_condition_message_pairs.json -n 16 --output ./demo_data
     ```
 
-* <b>Random mutation </b>
+*  **Random mutation**
     ```
     python -m data_generation.generate --strategy random --file ./demo_data/extracted_condition_message_pairs.json -n 16 --output ./demo_data
     ```
@@ -153,16 +153,10 @@ The generated inconsistent statements that we got based on our extracted stateme
     ```
     python -m data_generation.generate --strategy random_triplet --file ./demo_data/extracted_condition_message_pairs.json -n 16 --output ./demo_data
     ```
-* <b>Pattern mutation </b>
+* **Pattern mutation**
 
     ```
     python -m data_generation.generate --strategy pattern --file ./demo_data/extracted_condition_message_pairs.json -n 16 --output ./demo_data
-    ```
-
-* <b>Codex mutation</b>
-
-    ```
-    python -m data_generation.generate --strategy codex --file ./demo_data/extracted_condition_message_pairs.json -n 16 --output ./demo_data
     ```
 
 * **Embedding mutation.**
@@ -172,6 +166,12 @@ The generated inconsistent statements that we got based on our extracted stateme
 
     ```
     python -m data_generation.generate --strategy embed --file ./demo_data/extracted_condition_message_pairs.json -n 1 --output ./demo_data --model ./models/embedding/embed_if_32.mdl/embed_if_32.mdl
+    ```
+
+* <b>Codex mutation</b>
+
+    ```
+    python -m data_generation.generate --strategy codex --file ./demo_data/extracted_condition_message_pairs.json -n 16 --output ./demo_data
     ```
 
 * **All mutations at once**
@@ -234,7 +234,7 @@ mkdir -p saved_models
     ```
     python -m neural_models.train --model bilstm --class0 ./demo_data/bilstm_vectorized_consistent.npy --class1 ./demo_data/bilstm_vectorized_inconsistent.npy --output ./saved_models
     ```
-    **Output:** Our saved model from this step can be found in ./models/pretrained/bilstm
+    **Output:** Our saved model from this step can be found in ./models/pretrained/bilstm_final_version2.mdl
 
 * <b>Train CodeT5 </b>
 
@@ -242,14 +242,14 @@ mkdir -p saved_models
     python -m neural_models.train --model codet5 --class0 ./demo_data/codet5_formatted_data.jsonl --class1 None --output ./saved_models
     ```
 
-    **Output:** Our saved model from this step can be found in ./models/pretrained/codet5
+    **Output:** Our saved model from this step can be found in ./models/pretrained/t5_classification_final_ep2.mdl
 
 * <b>Train the triplet model</b>
 
     ```
     python -m neural_models.train --model triplet --class0 ./demo_data/triplet_data.npy --class1 None --output ./saved_models
     ```
-    **Output:** Our saved model from this step can be found in ./models/pretrained/triplet
+    **Output:** Our saved model from this step can be found in ./models/pretrained/embed_trimod_last
 
 ### **Make predictions**
 The user can use any saved or pretrained models to run prediction on a folder, a python file or a json file containing a list of condition message pairs.
@@ -291,49 +291,59 @@ python -m neural_models.predict --model triplet --target folder --source ./test_
 
 ### Evaluate
 
-#### Evaluation of the models on the artificial data
+#### **Evaluation of the models on the artificial data**
 To evaluate our model on the same artificial data that we used for evaluation, run the following commands:
 
 * **Evaluate bilstm**
     ```
-    python -m neural_models.test --model bilstm --source models/pretrained/bilstm --path_data datasets/bilstm_consistent_test.npy --path_labels datasets/bilstm_consistent_labels.npy --export_name bilstm_consistent_preds.npy
+    python -m neural_models.test --model bilstm --source models/pretrained/bilstm_final_version2.mdl --path_data datasets/bilstm_consistent_test.npy --path_labels datasets/bilstm_consistent_labels.npy --export_name bilstm_consistent_preds.npy
+    ```
 
-    python -m neural_models.test --model bilstm --source models/pretrained/bilstm --path_data datasets/bilstm_inconsistent_test.npy --path_labels datasets/bilstm_inconsistent_labels.npy --export_name bilstm_inconsistent_preds.npy
+    ```
+    python -m neural_models.test --model bilstm --source models/pretrained/bilstm_final_version2.mdl --path_data datasets/bilstm_inconsistent_test.npy --path_labels datasets/bilstm_inconsistent_labels.npy --export_name bilstm_inconsistent_preds.npy
     ```
 
 * **Evaluate triplet model**
     ```
     python -m neural_models.test --model triplet --source models/pretrained/embed_trimod_last --path_data datasets/consistent_synthetic_to_v3.json --export_name triplet_consistent_preds.npy
+    ```
 
+    ```
     python -m neural_models.test --model triplet --source models/pretrained/embed_trimod_last --path_data datasets/inconsistent_synthetic_to_v3.json --export_name triplet_inconsistent_preds.npy
     ```
 * **Evaluate codet5**
     ```
-    python -m neural_models.test --model codet5 --source models/pretrained/codet5 --path_data datasets/codet5_consistent_test.jsonl --export_name codet5_consistent_preds.npy
-
-    python -m neural_models.test --model codet5 --source models/pretrained/codet5 --path_data datasets/codet5_inconsistent_test.jsonl --export_name codet5_inconsistent_preds.npy
+    python -m neural_models.test --model codet5 --source models/pretrained/t5_classification_final_ep2.mdl/ --path_data datasets/codet5_consistent_test.json --export_name codet5_consistent_preds.npy
     ```
-#### Evaluate the models on real data (past bug fixes)
+
+    ```
+    python -m neural_models.test --model codet5 --source models/pretrained/t5_classification_final_ep2.mdl/ --path_data datasets/codet5_inconsistent_test.json --export_name codet5_inconsistent_preds.npy
+    ```
+#### **Evaluate the models on real data (past bug fixes)**
 * **Evaluate bilstm**
     ```
-    python -m neural_models.test --model bilstm --source models/pretrained/bilstm --path_data datasets/real_bilstm_consistent_test.npy --path_labels datasets/real_bilstm_consistent_labels.npy --export_name real_bilstm_consistent_preds.npy
-
-    python -m neural_models.test --model bilstm --source models/pretrained/bilstm --path_data datasets/real_bilstm_inconsistent_test.npy --path_labels datasets/real_bilstm_inconsistent_labels.npy --export_name real_bilstm_inconsistent_preds.npy
+    python -m neural_models.test --model bilstm --source models/pretrained/bilstm_final_version2.mdl --path_data datasets/bilstm_consistent_real.npy --path_labels datasets/bilstm_consistent_real_labels.npy --export_name bilstm_consistent_real_preds.npy
+    ```
+    ```
+    python -m neural_models.test --model bilstm --source models/pretrained/bilstm_final_version2.mdl --path_data datasets/bilstm_inconsistent_real.npy --path_labels datasets/bilstm_inconsistent_real_labels.npy --export_name bilstm_inconsistent_real_preds.npy
     ```
 
 * **Evaluate triplet model**
     ```
-    python -m neural_models.test --model triplet --source models/pretrained/triplet --path_data datasets/real_triplet_consistent_test.npy --export_name real_triplet_consistent_preds.npy
+    python -m neural_models.test --model triplet --source models/pretrained/embed_trimod_last --path_data testsets/real_con_pairs.json --export_name triplet_consistent_real_preds.npy
 
-    python -m neural_models.test --model triplet --source models/pretrained/triplet --path_data datasets/real_triplet_inconsistent_test.npy --export_name real_triplet_inconsistent_preds.npy
+    python -m neural_models.test --model triplet --source models/pretrained/embed_trimod_last --path_data testsets/real_incon_pairs.json --export_name triplet_inconsistent_real_preds.npy
     ```
 * **Evaluate codet5**
     ```
     python -m neural_models.test --model codet5 --source models/pretrained/t5_classification_final_ep2.mdl/ --path_data datasets/codet5_consistent_real.jsonl --export_name codet5_consistent_real_preds.npy
+    ```
 
+    ```
     python -m neural_models.test --model codet5 --source models/pretrained/t5_classification_final_ep2.mdl/ --path_data datasets/codet5_inconsistent_real.jsonl --export_name codet5_inconsistent_real_preds.npy
+    ```
 
-#### Analyze results
+#### **Analyze results**
 To analyze the results, first start the jupyterlab server by executing the following command from within the folder /home/CMI-Finder
 
 ```

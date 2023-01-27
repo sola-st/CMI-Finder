@@ -1,0 +1,146 @@
+[
+    [
+        "len(recv_buf) != want_len\n",
+        "raise RiakError(\"Socket returned short read {0} - expected {1}\".format(len(recv_buf), want_len))\n"
+    ],
+    [
+        "len(nmsglen) != 4\n",
+        "raise RiakError(\"Socket returned short packet length %d - expected 4\"%len(nmsglen))\n"
+    ],
+    [
+        "len(bits) != 4 and len(bits) != 6\n",
+        "raise template.TemplateSyntaxError(\"%r takes exactly four or six arguments (second argument must be 'as')\" % str(bits[0]))\n"
+    ],
+    [
+        "n2 > n1\n",
+        "raise ValueError('Total internal reflection impossible for n1 < n2')\n"
+    ],
+    [
+        "not (1 in arg1.shape)\n",
+        "raise TypeError(\"Input to Dot Product, %s, not a vector\" % str(arg1))\n"
+    ],
+    [
+        "not (1 in arg2.shape)\n",
+        "raise TypeError(\"Input to Dot Product, %s, not a vector\" % str(arg2))\n"
+    ],
+    [
+        "eccentricity > 1\n",
+        "raise GeometryError(\"eccentricity of ellipse/circle can only be less than or equal to 1\")\n"
+    ],
+    [
+        "data <= 0\n",
+        "raise ValueError(\"%s value must be greater than zero\" % data)\n"
+    ],
+    [
+        "version_info < (3, 6)\n",
+        "raise NotImplementedError(\"Currently only Python versions >3.5 are supported!\")\n"
+    ],
+    [
+        "self.file is None or self.file == ''\n",
+        "raise CX(_(\"image has no file specified\"))\n"
+    ],
+    [
+        "isinstance(bytestream, (io.StringIO, io.TextIOWrapper))\n",
+        "raise TypeError('%r is not a byte stream' % bytestream)\n"
+    ],
+    [
+        "not isinstance(method_args, list) and not isinstance(method_args, tuple)\n",
+        "raise ValueError(\"method_args must be a list or tuple, got %s\" % type(method_args))\n"
+    ],
+    [
+        "self.vs30_ref > gsim_ref\n",
+        "raise ValueError('%s.DEFINED_FOR_REFERENCE_VELOCITY=%s < %s'% (gsim.__class__.__name__, gsim_ref, self.vs30_ref))\n"
+    ],
+    [
+        "not name in accounted_fields\n",
+        "raise ValueError(\"Unaccounted field %s in fieldset\" % name)\n"
+    ],
+    [
+        "self.max_output_weight and output_weight > self.max_output_weight and not ((self.max_input_weight and input_weight > self.max_input_weight))\n",
+        "raise OutputWeightLimit('A limit of %d on the maximum output weight was set. The weight of your output is %d. Please reduce the number of sites, the number of IMTs, the number of realizations or the number of stochastic event sets; otherwise, raise the parameter max_output_weight in openquake.cfg' % (self.max_output_weight, output_weight))\n"
+    ],
+    [
+        "not (isinstance(e, LiteralExpr))\n",
+        "raise Error(\"don't know how to split expression \\\"%s\\\"\" % e)\n"
+    ],
+    [
+        "not (six.PY2)\n",
+        "raise unittest.SkipTest(\"xpayload only enabled for PY2\")\n"
+    ],
+    [
+        "self.postgres_version[0] == 8 and self.postgres_version[1] == 2 and self.postgres_version[2] <= 4\n",
+        "raise NotImplementedError('PostgreSQL 8.2 to 8.2.4 is known to have a faulty implementation of %s. Please upgrade your version of PostgreSQL.' % aggregate.sql_function)\n"
+    ],
+    [
+        "bits[2] != 'in'\n",
+        "raise TemplateSyntaxError(\"second argument to %s tag must be 'in'\" % bits[0])\n"
+    ],
+    [
+        "(not (html_body or text_body))\n",
+        "raise ValueError(\"No text or html body found for mail\")\n"
+    ],
+    [
+        "backlog < 1\n",
+        "raise exception.InvalidInput(reason=_('The backlog must be more than 0'))\n"
+    ],
+    [
+        "self.processes and self.process >= self.processes\n",
+        "raise ValueError('process must be less than processes')\n"
+    ],
+    [
+        "not self.fields and not self.field and not self.script\n",
+        "raise RuntimeError(\"Field, Fields or Script is required:%s\" % self.order)\n"
+    ],
+    [
+        "not isinstance(value, list)\n",
+        "raise InvalidParameterQuery(\"value %r must be valid list\" % value)\n"
+    ],
+    [
+        "len(files) > 1\n",
+        "raise ProjectConfigurationError(_(\"There are more than one conf.py file and none of them say doc \"))\n"
+    ],
+    [
+        "n_clusters > n_leaves\n",
+        "raise ValueError('Cannot extract more clusters than samples: %s clusters where given for a tree with %s leaves.'% (n_clusters, n_leaves))\n"
+    ],
+    [
+        "not (len(args) == 2) and not (len(args) == 3)\n",
+        "raise TypeError('Database.set expected 2 or 3 arguments, got %d' % len(args))\n"
+    ],
+    [
+        "y_true.shape[1] != y_pred.shape[1]\n",
+        "raise ValueError(\"y_true and y_pred have different number of output ({0}!={1})\".format(y_true.shape[1], y_pred.shape[1]))\n"
+    ],
+    [
+        "n_features <= 0 \n",
+        "raise ValueError(\"n_features must be strictly positive, got %d\" %n_features)\n"
+    ],
+    [
+        "not os.path.isfile(self.source)\n",
+        "raise RuntimeError(\"Cannot find %s executable!\" % self.source)\n"
+    ],
+    [
+        "self.start > self.end\n",
+        "raise ValueError('Date range: \"%s\" , the start date must be before the end date' % self)\n"
+    ],
+    [
+        "p < 0 or p >= n\n",
+        "raise ValueError('index {} is not between 0 and {}'.format(p, n - 1))\n"
+    ],
+    [
+        "not (len(symbols) == 2)\n",
+        "raise NotImplementedError(f\"query not implemented for kkr_imp_wc with no. of symbols other than 2.\")\n"
+    ],
+    [
+        "surface == self.surface_sticky and friction != 0\n",
+        "raise ValueError('friction must be 0 on sticky surfaces.')\n"
+    ],
+    [
+        "idx >= length\n",
+        "raise IndexError(idx)\n"
+    ],
+    [
+        "not corp_code\n",
+        "raise ValueError('could not find \"{}\"'.format(corp_code))"
+    ]
+]
