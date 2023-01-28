@@ -389,4 +389,21 @@ Then open the notebook named: roc_curve.ipynb
     * Codex experiment results:
         - 'testsets/Codex eval.xlsx'
     
-Data Folders were intentionally omitted from the repo because they contain large-sized files but they will appear in the final zip package.
+Data Folders were intentionally omitted from the repo because they contain large-sized files but they will appear in the final zip package [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.7577796.svg)](https://doi.org/10.5281/zenodo.7577796).
+
+## Cite us:
+
+```Bibtex
+@software{bouzenia_islem_2023_7577796,
+  author       = {Bouzenia Islem and
+                  Pradel Michael},
+  title        = {{CMI-Finder: Learning to Find Inconsistencies in 
+                   Condition Message Statements}},
+  month        = jan,
+  year         = 2023,
+  publisher    = {Zenodo},
+  version      = {v1},
+  doi          = {10.5281/zenodo.7577796},
+  url          = {https://doi.org/10.5281/zenodo.7577796}
+}
+```
