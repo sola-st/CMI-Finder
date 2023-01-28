@@ -8,7 +8,7 @@ import os
 
 def test_search_and_clone():
     goal = 10
-    auth = ("islem-esi", "Bearer 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")
+    auth = ("islem-esi", "Bearer TOKEN")
     base_dir = "cloned_repos"
     search_and_clone(goal=goal, auth=auth, base_dir=base_dir)
 
