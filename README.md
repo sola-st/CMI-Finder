@@ -13,29 +13,32 @@ You can import and test the artificat in two ways:
 1. [In our shared docker](#docker-setup)
 2. [As a pyhon package through command line](#python-package-setup)
 
-Then you can refer to [Usage](#usage) instructions on how to use our framework.
+Then, you can refer to [Usage](#usage) instructions on how to use our framework.
 Finally, in [Data Folders](#data-folders) you find an overview of the shared data that come with this artifact.
 
 ## Docker setup
 Before you start this setup, make sure docker is installed on your host machine. If not, please refer to: https://docs.docker.com/get-docker/
 
 ### Step 1: Load image
-Load the docker image that we share in the folder dockers at the root of the repository.
+Load the docker image that we share in the folder ./dockers at the root of this repository.
 ```
 docker image load -i ./dockers/cmi.image2.tar
 ```
 ### Step 2: run and attach
+This command will bring you inside the docker.
 ```
 docker container start --attach -i cmi.image:v2.0
 ```
 
 ### Step 3: Copy important folders to the docker
+In a new command line on host machine and not the docker, run the below command.
+It's better to let the docker cp command auto complete the name of the image to make sure it's the right name.
 ```
-docker cp datasets cmi.image.v1:/home/CMI-Finder
+docker cp datasets cmi.image:/home/CMI-Finder
 ```
 
 ### Step 4 : activate the virtual environement
-The user is supposed to be inside the docker after step 2.
+Make sure you are inside the docker when executing this step (if not, re-execute step 2 first).
 ```
 cd /home/CMI-Finder
 source .venv/bin/activate
@@ -45,14 +48,14 @@ source .venv/bin/activate
 We assume you already have Python3.8 installed on your machine.
 In your host machine, navigate to the root of this repository and execute the following:
 
-<b>Note:</b> Do not run these steps inside our shared docker image, it's already set up.
+**Note:** Do not run these steps inside our shared docker image, it's already set up.
  ### Step 1: 
- create a new virtual environment using python3.8 or higher. In the following example, we create a virtual environment named .venv
+ create a new virtual environment using python3.8 (recommended). In the following example, we create a virtual environment named .venv
  ```
  python3.8 -m venv .venv
  ```
  ### Step 2: 
-activate the environement (make sure you are in the parent directory of .venv)
+activate the environement
  ```
  source .venv/bin/activate
  ```
@@ -70,7 +73,7 @@ activate the environement (make sure you are in the parent directory of .venv)
  ```
 
  ### step 5:
-  For first time setup, you need to download nltk data files because:
+  For first time setup, you need to download nltk data files using The following command:
 
  ```
 python src/data_generation/nltk_setup.py
@@ -81,7 +84,7 @@ After setting up your environment, whether in Docker image or by installing the 
 ### **Data collection**
 In this step, cmi-finder either scrapes randomly a configurable number of repositories or it clones a list of repositories given by the user in a text file.
 
-First, let's a create a folder destination for the cloned repos:
+First, let's a create a destination folder for the cloned repos:
 ```
 mkdir -p demo_repos
 ```
@@ -95,7 +98,7 @@ mkdir -p demo_repos
 
     **Output:** For our experiments, we used a random scraper to collect our set of repositories. The list of repositories that we scraped is given in the file **./datasets/cmi_finder_repos_list.json**
 
-* **Option2: Scraping a list of repositories from GitHub.** The following command will scrape the list of repositories given in the file target_repos.txt and save them to the folder ./output_folder
+* **Option2: Scraping a list of repositories from GitHub.** The following command will scrape the list of repositories given in the file ./demo_repos/target_repos.txt and save them to the folder ./demo_repos
 
     ```
     python -m data_collection.scrape --strategy list --strategy_arg ./demo_repos/target_repos.txt --output ./demo_repos
@@ -104,9 +107,9 @@ mkdir -p demo_repos
 **Note:** all the used folders should exist priorly
 
 ### **Data extraction**
-In this step cmi-finder extracts functions from all python files given in a directory and all its subtree then extracts condition-message statements from those functions.
+In this step cmi-finder extracts functions from all python files in a directory and all its subtree then extracts condition-message statements from those functions.
 
-First let's create a folder destination where to save the output data.
+First let's create a destination folder where to save the output data.
 ```
 mkdir -p demo_data
 ```
@@ -130,14 +133,14 @@ The following command will extract condition-message statements from the list of
 ### **Data generation**
 In this step, cmi-finder generates inconsistent condition-message statements from the previously collected likely consistent statements. cmi-finder offers 6 generation techniques. You can invoke all of them at once or each strategy individually. Data generation depends on the existence of a file containing the list of extracted condition message pairs.
 
-The generated inconsistent statements that we got based on our extracted statements (in the previous steps) are in the folder ./datasets with file name ending with inconsistent_data.json.
+The generated inconsistent statements that we got based on our extracted statements (in the previous steps) are in the folder ./datasets with the files names ending with 'inconsistent_data.json'.
 
-* **Condition mutation.** The bellow command executes the condition mutation strategy on the list of condition-message statements given in the file ./demo_data/extracted_condition_message_pairs.json using 16 cpus and outputting the results to the folder ./demo_data
+* **Condition mutation.** The bellow command executes the condition mutation strategy on the list of condition-message statements given in the file ./demo_data/extracted_condition_message_pairs.json using 16 cpus and outputs the results to the folder ./demo_data
 
     ```
     python -m data_generation.generate --strategy condition --file ./demo_data/extracted_condition_message_pairs.json -n 16 --output ./demo_data
     ```
-    Similarly the same can be done for the following generation strategies:
+    Similarly, the same can be done for the following generation strategies:
 
 * **Message mutation**
     ```
@@ -149,7 +152,7 @@ The generated inconsistent statements that we got based on our extracted stateme
     python -m data_generation.generate --strategy random --file ./demo_data/extracted_condition_message_pairs.json -n 16 --output ./demo_data
     ```
 
-    Exceptionally for this strategy, if the generated data is going to be used for training the triplet model, the user should run the following instead of the above:
+    For this strategy, if the generated data is going to be used for training the triplet model, the user should run the following instead of the above:
     ```
     python -m data_generation.generate --strategy random_triplet --file ./demo_data/extracted_condition_message_pairs.json -n 16 --output ./demo_data
     ```
@@ -175,17 +178,17 @@ The generated inconsistent statements that we got based on our extracted stateme
     ```
 
 * **All mutations at once**
-The following command will apply all mutation on the given data
+The following command will apply all mutation on the given data (do not execute if you already executed the previous steps)
     ```
-    python -m data_generation.generate --strategy all --file ./demo_folder/extracted_condition_message_pairs.json -n 1 --output ./demo_folder --model ./models/embedding/embed_if_32.mdl/embed_if_32.mdl
+    python -m data_generation.generate --strategy all --file ./demo_data/extracted_condition_message_pairs.json -n 1 --output ./demo_data --model ./models/embedding/embed_if_32.mdl/embed_if_32.mdl
     ```
 
 ### **Data preparation**
-This step prepares the data collected and generated to be used for training by different neural models.
+This step prepares the collected and generated data to be used for training by different neural models.
 
-* <b>Preparing data for BILSTM.</b> The below command prepares the data for the BILSTM model. The command read the data files paths saved in the files ./demo_data/data_paths.json and outputs the results to the folder ./demo_data
+* **Preparing data for BILSTM.** The below command prepares the data for the BILSTM model. The command read the data files paths saved in the files ./demo_data/data_paths.json and outputs the results to the folder ./demo_data
 
-	The content of the file ./demo_data/data_paths.json is a dictionary of the paths of different data files. When creating your own files, make sure to respect the name of the keys as presented in the following example and to include only files that paths that already exist. If you are doing this inside the docker image, there is already a file containing these paths, you can edit it based on your needs (using nano editor for example).
+	The content of the file ./demo_data/data_paths.json is a dictionary of the paths of different data files. When creating your own files, make sure to respect the names of the keys as presented in the following example and to include only paths that already exist. If you are doing this inside the docker image, there is already a file containing these paths, you can edit it based on your needs (using nano editor for example).
 
     ```Json
     {
@@ -200,21 +203,21 @@ This step prepares the data collected and generated to be used for training by d
         "inconsistent": "path/to/some/inconsistent/data"
     }
     ```
-    In the command, we also specify the length of sequence of tokens that we want and the vector size depending on the embedding model (default 32) and the embedding model (fasttext)
+    In the command, we also specify the length of sequence of tokens that we want and the vector size depending on the embedding model (default 32)
 
     ```
     python -m preprocessing.prepare_data --model bilstm --sources ./demo_data/data_paths.json --output ./demo_data --length 64 --vector 32
     ```
     **Output:** The result of executing this step on our data produces two files: ./datasets/bilstm_vectorized_consistent.npy and ./datasets/bilstm_vectorized_inconsistent.npy. Those two files are enough to launch the training of the BILSTM model.
 
-* <b>Preparing data for Triplet.</b> The below command prepares the data for the triplet model. The command reads the data files path saved in the files ./data_paths.json and outputs the results to the folder ./output_folder. In the command, we also specify the length of sequence of tokens that we want, the vector size depending on the embedding model (default 32) and the embedding model (fasttext)
+* **Preparing data for Triplet.** The below command prepares the data for the triplet model. The command reads the data files path saved in ./data_paths.json and outputs the results to the folder ./demo_data. In the command, we also specify the length of sequence of tokens that we want, the vector size depending on the embedding model (default 32)
 
     ```
     python -m preprocessing.prepare_data --model triplet --sources ./demo_data/data_paths.json --output ./demo_data --length 32 --vector 32
     ```
     **Output:** The result of executing this step on our data produces the file ./datasets/triplet_data.npy which is enough to launch the training of the Triplet model.
 
-* <b>Preparing data for CodeT5.</b> The below command prepares the data for the CodeT5 model. The command reads the data files path saved in the files ./data_paths.json and outputs the results to the folder ./output_folder. 
+* **Preparing data for CodeT5.** The below command prepares the data for the CodeT5 model. The command reads the data files path saved in the files ./data_paths.json and outputs the results to the folder ./demo_data. 
 
     ```
     python -m preprocessing.prepare_data --model codet5 --sources ./demo_data/data_paths.json --output ./demo_data
@@ -352,7 +355,7 @@ To analyze the results, first start the jupyterlab server by executing the follo
 
 Then on your host machine, access the jupyterlab server via the following url: 127.0.0.1:8752
 
-Then open the notebook named: ro_curve.ipynb
+Then open the notebook named: roc_curve.ipynb
 
 ## Data Folders
 * ### [datasets](./datasets/): 
