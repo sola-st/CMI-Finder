@@ -391,7 +391,20 @@ Then open the notebook named: roc_curve.ipynb
     
 Data Folders were intentionally omitted from the repo because they contain large-sized files but they will appear in the final zip package [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.7577796.svg)](https://doi.org/10.5281/zenodo.7577796).
 
-## Cite us:
+
+## Pull requests (bug reporting)
+|  Project |  Reported Bugs |  Pull request |  Status |
+|---|---|---|---|
+|  Sympy | 2  |  https://github.com/sympy/sympy/pull/23242 |  Merged |
+|  Scipy | 6  |   https://github.com/scipy/scipy/pull/15728/ | Merged |
+|  Tensorflow | 2  |   https://github.com/tensorflow/tensorflow/pull/55191 | Merged |
+|  Tensorflow | 21  |   https://github.com/tensorflow/tensorflow/pull/58589 | Open |
+|  Sympy | 2  |   https://github.com/sympy/sympy/pull/24265 | Open |
+|  Scrapy | 1  |   https://github.com/scrapy/scrapy/pull/5715 | Merged |
+|  Scipy | 5  |   https://github.com/scipy/scipy/pull/17425 | Closed |
+|  Azure | 1 * 12  |   https://github.com/Azure/azure-sdk-for-python/pull/23284 | Merged |  
+
+## Cite the artifact:
 
 ```Bibtex
 @software{bouzenia_islem_2023_7577796,
