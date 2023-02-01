@@ -402,7 +402,7 @@ Data Folders were intentionally omitted from the repo because they contain large
 |  Sympy | 2  |   https://github.com/sympy/sympy/pull/24265 | Open |
 |  Scrapy | 1  |   https://github.com/scrapy/scrapy/pull/5715 | Merged |
 |  Scipy | 5  |   https://github.com/scipy/scipy/pull/17425 | Closed |
-|  Azure | 1 * 12  |   https://github.com/Azure/azure-sdk-for-python/pull/23284 | Merged |  
+|  Azure | 1 * 8  |   https://github.com/Azure/azure-sdk-for-python/pull/23284 | Merged |  
 
 ## Cite the artifact:
 
