@@ -14,6 +14,8 @@ if len(bits) != 4 or len(bits) != 6 :
 The package includes all of the data and code used in the study.
 
 ## How to use the artifact?
+Before using the artifact please refer to [ARTIFACT_REQUIREMENTS.srt](./ARTIFACT_REQUIREMENTS.rst) file to check the needed requirements to run this artifact (both hardware and software).
+
 You can import and test the artificat in two ways:
 1. [In our shared docker](#docker-setup)
 2. [As a pyhon package through command line](#python-package-setup)
