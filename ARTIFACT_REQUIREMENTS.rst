@@ -13,8 +13,7 @@
 |
 -   **Disk Space**: We have multiple data files that sums up to 45 GB +
     12 GB for docker image.
-
-
+|
 -   **RAM free space**: some data preprocessing requires large RAM
     space, in our experiments the usage might go up to 80 GBs of RAM.
     However, we provide in our instructions a toy example that does not
