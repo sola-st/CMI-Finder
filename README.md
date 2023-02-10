@@ -1,7 +1,7 @@
 # CMI-Finder
 
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.7577796.svg)](https://doi.org/10.5281/zenodo.7577796)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.7624781.svg)](https://doi.org/10.5281/zenodo.7624781)
 
 
 This artifact is a full functional and reusable implementation of the approach and results presented in the paper ["When to Say What: Learning to Find Condition-Message Inconsistencies"](https://drive.google.com/file/d/15owjJPBpH5y12mjIcFYfcDQk7UvnCOwk). The goal of CMI-Finder is to automatically detect condition-message inconsistencies. An example of condition message inconsistency is given below where the operator "or" in the condition is inconsistent with the logic of the message (or --> and):
