@@ -391,7 +391,8 @@ Then open the notebook named: roc_curve.ipynb
     * Codex experiment results:
         - 'testsets/Codex eval.xlsx'
     
-Data Folders were intentionally omitted from the repo because they contain large-sized files but they will appear in the final zip package [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.7577796.svg)](https://doi.org/10.5281/zenodo.7577796).
+Data Folders were intentionally omitted from the repo because they contain large-sized files but they will appear in the final zip package 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.7624781.svg)](https://doi.org/10.5281/zenodo.7624781)
 
 
 ## Pull requests (bug reporting)
